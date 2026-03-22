@@ -1452,12 +1452,18 @@ const firebaseConfig = {
   measurementId: "G-SR2LDPREGC"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db      = firebase.firestore();
-const auth    = firebase.auth();
-const storage = firebase.storage();
-// Firestore offline persistence - keeps catalogue working even with brief internet drops
-db.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+let db, auth, storage;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db      = firebase.firestore();
+  auth    = firebase.auth();
+  storage = firebase.storage();
+  // Offline persistence - catalogue works even with brief internet drops
+  db.enablePersistence({synchronizeTabs:true}).catch(e=>console.warn('Persistence:',e));
+} catch(e) {
+  console.error('Firebase init failed:', e);
+  document.querySelector('#loadingOv div:last-child').textContent = 'Firebase error: ' + e.message;
+}
 
 // === CONSTANTS & DEFAULTS ===
 const DEF_SETTINGS = {supKey:'supplier2024',wa:'',address:''};
@@ -1485,6 +1491,8 @@ let pz=null,fsPz=null;
 
 // === INIT ===
 async function initApp(){
+  // Safety net: always hide loading after 6 seconds no matter what
+  const safetyTimer = setTimeout(hideLoading, 6000);
   try{
     await loadSettings();
     startProductsListener();
@@ -1494,8 +1502,13 @@ async function initApp(){
         document.getElementById('adminEmailLabel').textContent=user.email||'';
       }
     });
-  }catch(e){console.error('Init:',e);}
-  finally{hideLoading();}
+  }catch(e){
+    console.error('Init error:',e);
+    toast('Connection issue: '+e.message,'err');
+  }finally{
+    clearTimeout(safetyTimer);
+    hideLoading();
+  }
 }
 
 function hideLoading(){
