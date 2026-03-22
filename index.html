@@ -1816,7 +1816,13 @@ function renderCatPanel() {
     const subs=D.subcats[cat]||[],defs=DEF_SUBCATS[cat]||[];
     const chips=subs.map(s=>{
       const isDef=defs.includes(s),used=D.products.some(p=>p.cat===cat&&p.sub===s);
-      return '<div class="sub-chip'+(isDef?' default':'')+'"><span class="chip-icon">'+getSubIcon(cat,s)+'</span><span>'+esc(s)+'</span>'+(used?'<span style="font-size:0.6rem;color:var(--gold);margin-left:2px">●</span>':'')+'<button class="sub-chip-del" onclick=\'delSubcat('+JSON.stringify(cat)+','+JSON.stringify(s)+')\'>✕</button>'</div>';
+return '<div class="sub-chip'+(isDef?' default':'')+'">'
+  +'<span class="chip-icon">'+getSubIcon(cat,s)+'</span>'
+  +'<span>'+esc(s)+'</span>'
+  +(used?'<span style="font-size:0.6rem;color:var(--gold);margin-left:2px">●</span>':'')
+  +'<button class="sub-chip-del" onclick=\'delSubcat('+JSON.stringify(cat)+','+JSON.stringify(s)+')\'>✕</button>'
+  +'</div>';
+      
     }).join('')||'<div class="no-subs">No sub-categories yet</div>';
     const iconPicker=ICON_OPTIONS.map(ic=>'<div class="icon-opt'+((selectedIcon[cat]||ICON_OPTIONS[0])===ic?' selected':'')+'" onclick="pickIcon('+JSON.stringify(cat)+','+JSON.stringify(ic)+')">'+ic+'</div>').join('');
     return '<div class="cat-section"><div class="cat-section-head"><div class="cat-section-title">'+labels[cat]+'<span class="cat-badge">'+subs.length+' sub-categories</span></div><button class="btn btn-gold btn-sm" onclick=\'toggleAddSubForm('+JSON.stringify(cat)+')\'">+ Add</button></div>'
