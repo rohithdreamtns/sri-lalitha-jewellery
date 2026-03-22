@@ -1,0 +1,2475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sri Lalitha Jewellery — Pure · Elegant · Timeless</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A864;
+  --gold-l: #E8D49A;
+  --gold-d: #8B6914;
+  --obsidian: #06060A;
+  --dark: #0E0E14;
+  --dark2: #161620;
+  --dark3: #1E1E2C;
+  --border: #242434;
+  --border-g: rgba(201,168,100,0.25);
+  --text: #F0EDE8;
+  --muted: #7A7A8A;
+  --silver-c: #D4D4E0;
+  --silver-d: #9090A8;
+  --bronze: #C87941;
+  --bronze-l: #E8A86A;
+  --r: 14px;
+  --rs: 8px;
+  --ease: cubic-bezier(0.4,0,0.2,1);
+  --t: 0.3s;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--obsidian);
+  color:var(--text);
+  font-family:'Jost',sans-serif;
+  font-weight:300;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--dark)}
+::-webkit-scrollbar-thumb{background:var(--gold-d);border-radius:3px}
+
+/* ── NOISE TEXTURE OVERLAY ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:0.5;
+}
+
+/* ── HEADER ── */
+header{
+  position:sticky;top:0;z-index:200;
+  background:rgba(6,6,10,0.92);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.hdr{
+  max-width:1440px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;height:72px;
+}
+.logo{display:flex;align-items:center;gap:0.85rem;cursor:pointer;text-decoration:none}
+.logo-gem{
+  width:42px;height:42px;
+  background:linear-gradient(135deg,var(--gold-l),var(--gold),var(--gold-d));
+  clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;
+  animation:gemFloat 4s ease-in-out infinite;
+}
+@keyframes gemFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.logo-text .name{
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem;font-weight:700;
+  color:var(--gold);letter-spacing:0.03em;line-height:1.2;
+}
+.logo-text .tagline{
+  font-size:0.6rem;color:var(--muted);
+  letter-spacing:0.22em;text-transform:uppercase;
+}
+.hdr-right{display:flex;align-items:center;gap:0.6rem}
+.icon-btn{
+  width:40px;height:40px;border-radius:50%;
+  background:var(--dark2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1rem;
+  transition:border-color var(--t) var(--ease),transform var(--t) var(--ease);
+  position:relative;
+}
+.icon-btn:hover{border-color:var(--gold);transform:scale(1.05)}
+.icon-btn.admin-btn{font-size:0.85rem}
+
+/* ── HERO ── */
+.hero{
+  position:relative;
+  padding:6rem 2rem 5rem;
+  text-align:center;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%,rgba(201,168,100,0.07) 0%,transparent 70%),
+    radial-gradient(ellipse 50% 40% at 50% 100%,rgba(201,168,100,0.04) 0%,transparent 60%),
+    var(--obsidian);
+  overflow:hidden;
+}
+.hero-ornament{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:600px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0.4;
+}
+.hero-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2.2rem,5.5vw,4.2rem);
+  font-weight:700;line-height:1.15;
+  background:linear-gradient(160deg,var(--gold-l) 0%,var(--gold) 40%,var(--gold-d) 80%,var(--gold) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:0.6rem;
+}
+.hero-sub{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1rem,2vw,1.25rem);
+  color:var(--muted);
+  margin-bottom:3rem;
+  letter-spacing:0.05em;
+}
+.cat-row{
+  display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;
+}
+.cat-btn{
+  padding:0.75rem 2.25rem;
+  border-radius:50px;
+  border:1.5px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--muted);
+  cursor:pointer;font-family:'Jost',sans-serif;
+  font-size:0.85rem;font-weight:400;
+  letter-spacing:0.08em;text-transform:uppercase;
+  transition:all var(--t) var(--ease);
+  display:flex;align-items:center;gap:0.6rem;
+  position:relative;overflow:hidden;
+}
+.cat-btn::before{
+  content:'';position:absolute;inset:0;
+  opacity:0;transition:opacity var(--t) var(--ease);
+}
+.cat-btn[data-c="gold"]::before{background:linear-gradient(135deg,var(--gold-l),var(--gold))}
+.cat-btn[data-c="silver"]::before{background:linear-gradient(135deg,#E0E0F0,var(--silver-c))}
+.cat-btn[data-c="panchaloham"]::before{background:linear-gradient(135deg,var(--bronze-l),var(--bronze))}
+.cat-btn.active,
+.cat-btn:hover{color:var(--obsidian);border-color:transparent;font-weight:500}
+.cat-btn.active::before,
+.cat-btn:hover::before{opacity:1}
+.cat-btn span,.cat-btn em{position:relative;z-index:1;font-style:normal}
+
+/* ── MAIN LAYOUT ── */
+.main-wrap{max-width:1440px;margin:0 auto;padding:2.5rem 2rem}
+
+/* ── SUBCATEGORY BAR ── */
+.sub-bar{
+  display:flex;gap:0.5rem;
+  overflow-x:auto;padding-bottom:0.5rem;
+  margin-bottom:2.5rem;
+  scrollbar-width:none;
+}
+.sub-bar::-webkit-scrollbar{display:none}
+.sub-btn{
+  padding:0.45rem 1.2rem;
+  border-radius:50px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;font-family:'Jost',sans-serif;
+  font-size:0.78rem;font-weight:400;
+  letter-spacing:0.05em;
+  white-space:nowrap;
+  transition:all var(--t) var(--ease);
+}
+.sub-btn.active,.sub-btn:hover{
+  border-color:var(--gold);color:var(--gold);
+  background:rgba(201,168,100,0.07);
+}
+
+/* ── SECTION HEADING ── */
+.sec-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1.75rem;
+}
+.sec-title{
+  font-family:'Playfair Display',serif;
+  font-size:1.4rem;font-weight:600;
+  color:var(--text);
+}
+.sec-count{
+  font-size:0.75rem;color:var(--muted);
+  letter-spacing:0.08em;
+}
+
+/* ── PRODUCT GRID ── */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:1.5rem;
+}
+
+/* ── PRODUCT CARD ── */
+.p-card{
+  background:var(--dark2);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  overflow:hidden;cursor:pointer;
+  transition:transform var(--t) var(--ease),
+             border-color var(--t) var(--ease),
+             box-shadow var(--t) var(--ease);
+  position:relative;
+}
+.p-card:hover{
+  transform:translateY(-6px);
+  border-color:var(--border-g);
+  box-shadow:0 20px 50px rgba(201,168,100,0.12),0 4px 12px rgba(0,0,0,0.4);
+}
+.p-card-img-wrap{
+  position:relative;
+  aspect-ratio:1;overflow:hidden;
+  background:var(--dark3);
+}
+.p-card-img-wrap img{
+  width:100%;height:100%;
+  object-fit:cover;display:block;
+  transition:transform 0.6s var(--ease);
+}
+.p-card:hover .p-card-img-wrap img{transform:scale(1.06)}
+.p-card-placeholder{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:3.5rem;opacity:0.18;
+  background:linear-gradient(135deg,var(--dark3),var(--dark2));
+}
+.badge{
+  position:absolute;top:0.6rem;
+  padding:0.2rem 0.55rem;
+  border-radius:4px;
+  font-size:0.62rem;font-weight:500;
+  letter-spacing:0.06em;text-transform:uppercase;
+}
+.badge-360{
+  left:0.6rem;
+  background:rgba(6,6,10,0.75);
+  border:1px solid var(--gold);
+  color:var(--gold);
+}
+.badge-new{
+  right:0.6rem;
+  background:var(--gold);
+  color:var(--obsidian);
+  font-weight:600;
+}
+.p-card-body{padding:1rem 1rem 1.1rem}
+.p-card-name{
+  font-family:'Playfair Display',serif;
+  font-size:0.95rem;font-weight:600;
+  margin-bottom:0.45rem;
+  line-height:1.3;
+  color:var(--text);
+}
+.p-card-tags{display:flex;flex-wrap:wrap;gap:0.35rem;margin-top:0.4rem}
+.tag{
+  background:rgba(201,168,100,0.08);
+  border:1px solid rgba(201,168,100,0.15);
+  color:var(--gold);
+  padding:0.18rem 0.55rem;
+  border-radius:4px;font-size:0.68rem;
+  letter-spacing:0.04em;
+}
+.tag-code{
+  font-size:0.68rem;color:var(--muted);
+  margin-left:auto;align-self:center;
+}
+
+/* ── EMPTY STATE ── */
+.empty{
+  text-align:center;padding:5rem 2rem;
+  color:var(--muted);
+}
+.empty-icon{font-size:4rem;opacity:0.15;margin-bottom:1rem}
+.empty h3{
+  font-family:'Playfair Display',serif;
+  font-size:1.25rem;color:var(--muted);margin-bottom:0.5rem;
+}
+
+/* ── MODAL ── */
+.overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(4,4,8,0.88);
+  backdrop-filter:blur(14px);
+  display:flex;align-items:center;justify-content:center;
+  padding:1.5rem;
+  opacity:0;visibility:hidden;
+  transition:all var(--t) var(--ease);
+}
+.overlay.open{opacity:1;visibility:visible}
+.modal{
+  background:var(--dark2);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  width:100%;max-width:960px;
+  max-height:92vh;overflow-y:auto;
+  transform:scale(0.94) translateY(20px);
+  transition:transform var(--t) var(--ease);
+}
+.overlay.open .modal{transform:scale(1) translateY(0)}
+
+.m-grid{display:grid;grid-template-columns:1fr 1fr}
+@media(max-width:768px){.m-grid{grid-template-columns:1fr}}
+
+/* Viewer side */
+.m-viewer{
+  position:relative;
+  aspect-ratio:1;
+  background:var(--dark3);
+  border-radius:var(--r) 0 0 var(--r);
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+@media(max-width:768px){
+  .m-viewer{
+    border-radius:var(--r) var(--r) 0 0;
+    aspect-ratio:unset;
+    height:62vw;
+    min-height:260px;
+    max-height:420px;
+  }
+}
+
+/* Expand to fullscreen button */
+.expand-btn{
+  position:absolute;top:0.6rem;left:0.6rem;
+  width:34px;height:34px;border-radius:8px;
+  background:rgba(6,6,10,0.72);
+  border:1px solid rgba(255,255,255,0.12);
+  color:rgba(255,255,255,0.65);
+  font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  z-index:12;
+  transition:background 0.2s,color 0.2s,opacity 0.2s;
+  opacity:0;
+}
+.m-viewer:hover .expand-btn,
+.m-viewer:focus-within .expand-btn{ opacity:1 }
+/* always visible on touch devices */
+@media(hover:none){ .expand-btn{ opacity:1 !important } }
+
+/* ── FULLSCREEN LIGHTBOX ── */
+.fs-overlay{
+  position:fixed;inset:0;z-index:2000;
+  background:#000;
+  display:flex;flex-direction:column;
+  opacity:0;visibility:hidden;
+  transition:opacity 0.25s var(--ease),visibility 0.25s;
+}
+.fs-overlay.open{ opacity:1;visibility:visible }
+
+.fs-top{
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.6rem 1rem;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  z-index:2;
+}
+.fs-title{
+  font-family:'Playfair Display',serif;
+  font-size:0.95rem;color:rgba(255,255,255,0.8);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:70vw;
+}
+.fs-close{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);
+  color:rgba(255,255,255,0.7);font-size:1.1rem;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  transition:background 0.2s;
+}
+.fs-close:hover{ background:rgba(255,255,255,0.16) }
+
+.fs-viewport{
+  flex:1;overflow:hidden;
+  position:relative;
+  cursor:grab;
+  display:flex;align-items:center;justify-content:center;
+  touch-action:none;
+}
+.fs-viewport.dragging{ cursor:grabbing }
+.fs-viewport img{
+  display:block;
+  transform-origin:center center;
+  user-select:none;
+  -webkit-user-drag:none;
+  pointer-events:none;
+  max-width:none;
+}
+
+.fs-bar{
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;gap:0.4rem;
+  padding:0.6rem 1rem;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(8px);
+  border-top:1px solid rgba(255,255,255,0.06);
+}
+.fs-btn{
+  width:44px;height:44px;border-radius:50%;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06);
+  color:rgba(255,255,255,0.7);
+  font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.15s,color 0.15s,border-color 0.15s;
+}
+.fs-btn:hover{ background:rgba(201,168,100,0.2);color:var(--gold);border-color:var(--gold) }
+.fs-sep{ width:1px;height:22px;background:rgba(255,255,255,0.1);margin:0 0.2rem }
+.fs-zoom{
+  font-size:0.72rem;color:rgba(255,255,255,0.4);
+  min-width:44px;text-align:center;letter-spacing:0.04em;
+  user-select:none;
+}
+/* swipe hint on mobile */
+.fs-hint{
+  position:absolute;bottom:5rem;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,0.55);
+  color:rgba(255,255,255,0.45);
+  font-size:0.7rem;padding:0.3rem 0.85rem;border-radius:20px;
+  pointer-events:none;white-space:nowrap;
+  animation:hintFade 2.5s ease 0.8s both;
+}
+@keyframes hintFade{
+  0%{opacity:0} 20%{opacity:1} 75%{opacity:1} 100%{opacity:0;display:none}
+}
+.m-viewer img{
+  /* sizing handled by JS transform — do NOT set width/height here */
+  display:block;
+  transform-origin:center center;
+  user-select:none;
+  -webkit-user-drag:none;
+  pointer-events:none; /* pan handled by viewport */
+  max-width:none;
+}
+/* viewport that clips and receives pointer events */
+#imgViewport{
+  width:100%;height:100%;
+  position:relative;overflow:hidden;
+  cursor:grab;
+  display:flex;align-items:center;justify-content:center;
+}
+#imgViewport.dragging{cursor:grabbing}
+#imgViewport.rot-mode{cursor:crosshair}
+#threeCanvas{width:100%!important;height:100%!important;display:block}
+.m-viewer-placeholder{
+  font-size:6rem;opacity:0.08;
+  pointer-events:none;
+}
+.view-toggle{
+  position:absolute;bottom:1rem;right:1rem;
+  display:flex;gap:0.4rem;
+}
+.vtbtn{
+  padding:0.35rem 0.8rem;border-radius:20px;
+  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(6,6,10,0.7);
+  color:rgba(255,255,255,0.6);
+  font-size:0.7rem;font-family:'Jost',sans-serif;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.vtbtn.active{background:var(--gold);color:var(--obsidian);border-color:var(--gold);font-weight:500}
+.drag-hint{
+  position:absolute;top:1rem;left:50%;transform:translateX(-50%);
+  background:rgba(6,6,10,0.65);
+  color:rgba(255,255,255,0.5);
+  font-size:0.68rem;padding:0.28rem 0.75rem;border-radius:20px;
+  pointer-events:none;white-space:nowrap;
+  transition:opacity 0.5s;
+}
+
+/* Viewer toolbar */
+.viewer-controls{
+  position:absolute;bottom:0.7rem;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:0.3rem;
+  background:rgba(6,6,10,0.78);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:50px;padding:0.3rem 0.5rem;
+  backdrop-filter:blur(8px);
+  z-index:10;
+}
+.vc-btn{
+  width:30px;height:30px;border-radius:50%;
+  border:none;background:transparent;
+  color:rgba(255,255,255,0.55);
+  font-size:0.9rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.15s,color 0.15s;
+  line-height:1;
+}
+.vc-btn:hover{background:rgba(201,168,100,0.18);color:var(--gold)}
+.vc-btn.active{background:rgba(201,168,100,0.25);color:var(--gold)}
+.vc-sep{width:1px;height:16px;background:rgba(255,255,255,0.1);margin:0 0.1rem}
+.zoom-val{
+  font-size:0.62rem;color:rgba(255,255,255,0.35);
+  min-width:34px;text-align:center;letter-spacing:0.04em;
+  user-select:none;
+}
+
+/* Info side */
+.m-info{
+  padding:2rem;
+  display:flex;flex-direction:column;gap:1.1rem;
+  overflow-y:auto;max-height:calc(92vh);
+}
+@media(max-width:768px){.m-info{max-height:none}}
+.m-top{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+.m-cat{
+  font-size:0.68rem;color:var(--gold);
+  letter-spacing:0.14em;text-transform:uppercase;
+  margin-bottom:0.3rem;font-weight:400;
+}
+.m-title{
+  font-family:'Playfair Display',serif;
+  font-size:1.5rem;font-weight:700;
+  line-height:1.2;
+}
+.close-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--dark3);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1.1rem;color:var(--muted);
+  flex-shrink:0;
+  transition:all 0.2s;
+}
+.close-btn:hover{color:var(--text);border-color:var(--text)}
+.m-ref{
+  font-size:0.72rem;color:var(--muted);
+  background:var(--dark3);
+  border-radius:var(--rs);padding:0.4rem 0.75rem;
+  display:inline-block;
+  border:1px solid var(--border);
+}
+.d-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem}
+.d-item{
+  background:rgba(255,255,255,0.025);
+  border:1px solid var(--border);
+  border-radius:var(--rs);
+  padding:0.7rem 0.85rem;
+}
+.d-label{
+  font-size:0.62rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:0.1em;
+  margin-bottom:0.25rem;
+}
+.d-val{font-size:0.88rem;font-weight:500;color:var(--text)}
+.d-notes{
+  background:rgba(255,255,255,0.025);
+  border:1px solid var(--border);
+  border-radius:var(--rs);
+  padding:0.7rem 0.85rem;
+  grid-column:1/-1;
+}
+.supplier-box{
+  background:rgba(201,168,100,0.04);
+  border:1px solid rgba(201,168,100,0.18);
+  border-radius:var(--rs);padding:1rem;
+}
+.supplier-head{
+  font-size:0.75rem;color:var(--gold);
+  font-weight:500;margin-bottom:0.3rem;
+  display:flex;align-items:center;gap:0.4rem;
+}
+.supplier-desc{font-size:0.72rem;color:var(--muted);margin-bottom:0.6rem}
+.key-row{display:flex;gap:0.5rem}
+.inp{
+  flex:1;padding:0.55rem 0.9rem;
+  background:var(--dark3);border:1px solid var(--border);
+  border-radius:var(--rs);color:var(--text);
+  font-family:'Jost',sans-serif;font-size:0.82rem;
+  outline:none;transition:border-color 0.2s;
+}
+.inp:focus{border-color:var(--gold)}
+.inp::placeholder{color:var(--muted)}
+.supplier-info-revealed{
+  background:rgba(201,168,100,0.06);
+  border:1px solid var(--gold);
+  border-radius:var(--rs);padding:0.75rem;
+  margin-top:0.5rem;font-size:0.8rem;
+}
+.s-row{margin-bottom:0.35rem}
+.s-label{
+  font-size:0.6rem;color:var(--gold);
+  letter-spacing:0.1em;text-transform:uppercase;
+}
+.m-actions{display:flex;gap:0.6rem;flex-wrap:wrap}
+.btn{
+  padding:0.6rem 1.3rem;border-radius:var(--rs);
+  border:none;cursor:pointer;
+  font-family:'Jost',sans-serif;font-size:0.82rem;font-weight:400;
+  letter-spacing:0.04em;
+  transition:all var(--t) var(--ease);
+  display:flex;align-items:center;gap:0.5rem;
+}
+.btn-gold{
+  background:linear-gradient(135deg,var(--gold-l),var(--gold));
+  color:var(--obsidian);font-weight:500;
+}
+.btn-gold:hover{
+  background:linear-gradient(135deg,var(--gold),var(--gold-d));
+  transform:translateY(-1px);
+}
+.btn-wa{background:#25D366;color:#fff}
+.btn-wa:hover{background:#1da851;transform:translateY(-1px)}
+.btn-outline{
+  background:transparent;
+  border:1px solid var(--border);color:var(--muted);
+}
+.btn-outline:hover{border-color:var(--text);color:var(--text)}
+.btn-sm{padding:0.38rem 0.85rem;font-size:0.75rem;border-radius:6px}
+.btn-danger{background:#c0392b;color:#fff}
+.btn-danger:hover{background:#e74c3c}
+
+/* ── ADMIN OVERLAY ── */
+.admin-ov{
+  position:fixed;inset:0;z-index:800;
+  background:rgba(4,4,8,0.97);
+  backdrop-filter:blur(20px);
+  display:flex;flex-direction:column;
+  opacity:0;visibility:hidden;
+  transition:all var(--t) var(--ease);
+}
+.admin-ov.open{opacity:1;visibility:visible}
+.admin-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 1.75rem;
+  border-bottom:1px solid var(--border);
+  background:var(--dark);flex-shrink:0;
+}
+.admin-hdr h2{
+  font-family:'Playfair Display',serif;
+  color:var(--gold);font-size:1.15rem;
+}
+.admin-tabs-bar{
+  display:flex;gap:0;
+  padding:0 1.75rem;
+  border-bottom:1px solid var(--border);
+  background:var(--dark);flex-shrink:0;
+}
+.atab{
+  padding:0.85rem 1.25rem;
+  border:none;background:none;
+  color:var(--muted);cursor:pointer;
+  font-family:'Jost',sans-serif;font-size:0.85rem;
+  border-bottom:2px solid transparent;
+  margin-bottom:-1px;
+  transition:all 0.2s;
+}
+.atab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.admin-body{
+  flex:1;overflow-y:auto;
+  padding:1.75rem;
+  max-width:960px;width:100%;margin:0 auto;
+}
+.apanel{display:none}
+.apanel.active{display:block}
+
+/* Auth */
+.auth-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;min-height:100vh;gap:2rem;padding:2rem;
+}
+.auth-card{
+  background:var(--dark2);border:1px solid var(--border);
+  border-radius:var(--r);padding:2.25rem;
+  width:100%;max-width:380px;
+}
+.auth-card h3{
+  font-family:'Playfair Display',serif;
+  font-size:1.25rem;margin-bottom:1.5rem;
+  text-align:center;color:var(--gold);
+}
+
+/* Form elements */
+.fg{margin-bottom:1rem}
+.fl{
+  display:block;font-size:0.72rem;
+  color:var(--muted);text-transform:uppercase;
+  letter-spacing:0.1em;margin-bottom:0.4rem;
+}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:600px){.fgrid{grid-template-columns:1fr}}
+select.inp{
+  appearance:none;width:100%;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237A7A8A' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 0.75rem center;
+  padding-right:2rem;
+}
+textarea.inp{resize:vertical;min-height:72px;width:100%}
+.inp-full{width:100%}
+
+/* Upload areas */
+.up-area{
+  border:2px dashed var(--border);border-radius:var(--r);
+  padding:1.5rem;text-align:center;cursor:pointer;
+  transition:border-color var(--t) var(--ease);
+  position:relative;
+}
+.up-area:hover{border-color:var(--gold)}
+.up-area input{
+  position:absolute;inset:0;opacity:0;cursor:pointer;
+  width:100%;height:100%;
+}
+.up-icon{font-size:1.8rem;opacity:0.4;margin-bottom:0.4rem}
+.up-text{font-size:0.75rem;color:var(--muted)}
+.up-preview{
+  width:90px;height:90px;object-fit:cover;
+  border-radius:var(--rs);margin-top:0.75rem;
+  border:1px solid var(--border);
+}
+
+/* Supplier secret box */
+.secret-box{
+  background:rgba(201,168,100,0.04);
+  border:1px solid var(--border-g);
+  border-radius:var(--r);padding:1.25rem;
+  margin-bottom:1.25rem;
+}
+.secret-box-head{
+  font-size:0.8rem;color:var(--gold);
+  font-weight:500;margin-bottom:0.75rem;
+  display:flex;align-items:center;gap:0.4rem;
+}
+
+/* Admin product list */
+.ap-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:1rem;margin-top:1.25rem;
+}
+.ap-card{
+  background:var(--dark);border:1px solid var(--border);
+  border-radius:var(--rs);overflow:hidden;
+}
+.ap-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.ap-no-img{
+  width:100%;aspect-ratio:1;
+  background:var(--dark2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2rem;opacity:0.2;
+}
+.ap-info{padding:0.65rem}
+.ap-name{font-size:0.82rem;font-weight:500;margin-bottom:0.25rem;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ap-meta{font-size:0.68rem;color:var(--muted);margin-bottom:0.5rem}
+.ap-acts{display:flex;gap:0.4rem}
+
+/* Settings */
+.sg{
+  background:var(--dark);border:1px solid var(--border);
+  border-radius:var(--r);padding:1.25rem;margin-bottom:1rem;
+}
+.sg h3{
+  font-size:0.72rem;color:var(--gold);
+  text-transform:uppercase;letter-spacing:0.1em;
+  margin-bottom:1rem;font-weight:500;
+}
+.sec-title-a{
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem;color:var(--gold);
+  margin-bottom:1.25rem;
+  padding-bottom:0.5rem;
+  border-bottom:1px solid var(--border);
+}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:2rem;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--dark2);
+  border:1px solid var(--border);
+  border-radius:var(--rs);padding:0.7rem 1.5rem;
+  font-size:0.82rem;z-index:9999;
+  transition:transform 0.3s var(--ease);
+  white-space:nowrap;
+  pointer-events:none;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:#27ae60;color:#2ecc71}
+.toast.err{border-color:#c0392b;color:#e74c3c}
+
+/* Filter bar */
+.filter-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:0.75rem;
+}
+.search-wrap{
+  position:relative;
+  max-width:280px;width:100%;
+}
+.search-ico{
+  position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);
+  font-size:0.8rem;color:var(--muted);pointer-events:none;
+}
+.search-inp{
+  width:100%;padding:0.5rem 1rem 0.5rem 2.2rem;
+  background:var(--dark2);border:1px solid var(--border);
+  border-radius:50px;color:var(--text);
+  font-family:'Jost',sans-serif;font-size:0.82rem;
+  outline:none;transition:border-color 0.2s;
+}
+.search-inp:focus{border-color:var(--gold)}
+.search-inp::placeholder{color:var(--muted)}
+
+/* Responsive */
+@media(max-width:1024px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+}
+@media(max-width:768px){
+  .hdr{padding:0 1.25rem;height:64px}
+  .hero{padding:4rem 1.25rem 3.5rem}
+  .main-wrap{padding:2rem 1.25rem}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:1rem}
+  .d-grid{grid-template-columns:1fr 1fr}
+  .fgrid{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .grid{grid-template-columns:1fr 1fr;gap:0.75rem}
+  .cat-btn{padding:0.65rem 1.5rem;font-size:0.78rem}
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.fade-up{animation:fadeUp 0.5s var(--ease) both}
+.fade-up:nth-child(1){animation-delay:0.05s}
+.fade-up:nth-child(2){animation-delay:0.1s}
+.fade-up:nth-child(3){animation-delay:0.15s}
+.fade-up:nth-child(4){animation-delay:0.2s}
+.fade-up:nth-child(5){animation-delay:0.25s}
+.fade-up:nth-child(6){animation-delay:0.3s}
+.fade-up:nth-child(7){animation-delay:0.35s}
+.fade-up:nth-child(8){animation-delay:0.4s}
+.fade-up:nth-child(9){animation-delay:0.45s}
+
+/* Gold shimmer line */
+.gold-line{
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  margin:0;opacity:0.3;
+}
+
+/* ── SUBCATEGORY MANAGER ── */
+.cat-section{
+  background:var(--dark);border:1px solid var(--border);
+  border-radius:var(--r);padding:1.25rem;margin-bottom:1.25rem;
+}
+.cat-section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;
+}
+.cat-section-title{
+  font-family:'Playfair Display',serif;
+  font-size:1rem;font-weight:600;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.cat-badge{
+  font-size:0.65rem;font-family:'Jost',sans-serif;
+  font-weight:400;padding:0.18rem 0.6rem;
+  border-radius:50px;border:1px solid var(--border-g);
+  color:var(--gold);
+}
+.sub-chips{
+  display:flex;flex-wrap:wrap;gap:0.5rem;
+  margin-bottom:1rem;min-height:36px;
+}
+.sub-chip{
+  display:flex;align-items:center;gap:0.3rem;
+  background:rgba(201,168,100,0.07);
+  border:1px solid rgba(201,168,100,0.2);
+  border-radius:50px;
+  padding:0.28rem 0.5rem 0.28rem 0.75rem;
+  font-size:0.75rem;color:var(--text);
+  animation:fadeUp 0.2s var(--ease) both;
+}
+.sub-chip .chip-icon{font-size:0.8rem}
+.sub-chip-del{
+  width:18px;height:18px;border-radius:50%;
+  background:rgba(255,255,255,0.06);
+  border:none;color:var(--muted);
+  cursor:pointer;font-size:0.7rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.15s,color 0.15s;
+  flex-shrink:0;
+}
+.sub-chip-del:hover{background:rgba(192,57,43,0.3);color:#e74c3c}
+.sub-chip.default .sub-chip-del{opacity:0.35;pointer-events:none}
+.add-sub-row{display:flex;gap:0.5rem;align-items:center}
+.no-subs{
+  font-size:0.78rem;color:var(--muted);
+  padding:0.5rem 0;font-style:italic;
+}
+.icon-picker{
+  display:flex;flex-wrap:wrap;gap:0.3rem;
+  margin-bottom:0.5rem;
+}
+.icon-opt{
+  width:30px;height:30px;border-radius:6px;
+  background:var(--dark2);border:1px solid var(--border);
+  cursor:pointer;font-size:0.9rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color 0.15s,background 0.15s;
+}
+.icon-opt:hover,.icon-opt.selected{
+  border-color:var(--gold);
+  background:rgba(201,168,100,0.12);
+}
+.add-sub-form{
+  background:rgba(255,255,255,0.02);
+  border:1px solid var(--border);
+  border-radius:var(--rs);
+  padding:0.85rem;margin-top:0.75rem;
+  display:none;
+}
+.add-sub-form.open{display:block}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="hdr">
+    <a class="logo" href="#" onclick="scrollTop()">
+      <div class="logo-gem">💎</div>
+      <div class="logo-text">
+        <div class="name">Sri Lalitha Jewellery</div>
+        <div class="tagline">Pure · Elegant · Timeless</div>
+      </div>
+    </a>
+    <div class="hdr-right">
+      <button class="icon-btn admin-btn" title="Admin Panel" onclick="openAdmin()">⚙️</button>
+    </div>
+  </div>
+</header>
+<div class="gold-line"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-ornament"></div>
+  <h1 class="hero-title">Sri Lalitha Jewellery</h1>
+  <p class="hero-sub">Handcrafted excellence in Gold, Silver &amp; Panchaloham</p>
+  <div class="cat-row">
+    <button class="cat-btn active" data-c="gold" onclick="pickCat('gold')">
+      <em>✦</em><span>Gold</span>
+    </button>
+    <button class="cat-btn" data-c="silver" onclick="pickCat('silver')">
+      <em>◈</em><span>Silver</span>
+    </button>
+    <button class="cat-btn" data-c="panchaloham" onclick="pickCat('panchaloham')">
+      <em>⬡</em><span>Panchaloham</span>
+    </button>
+  </div>
+</section>
+<div class="gold-line"></div>
+
+<!-- MAIN -->
+<div class="main-wrap" id="catalogueSection">
+  <!-- Sub-category bar -->
+  <div class="sub-bar" id="subBar"></div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="sec-head" style="margin-bottom:0;flex:1">
+      <div class="sec-title" id="secTitle">Gold Designs</div>
+      <div class="sec-count" id="secCount"></div>
+    </div>
+    <div class="search-wrap" style="margin-left:1rem">
+      <span class="search-ico">🔍</span>
+      <input class="search-inp" id="searchInp" placeholder="Search designs..." oninput="renderProducts()">
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid" id="pGrid"></div>
+
+  <!-- Empty -->
+  <div class="empty" id="emptyEl" style="display:none">
+    <div class="empty-icon">💍</div>
+    <h3>No designs yet</h3>
+    <p style="font-size:0.82rem;margin-top:0.35rem">Add designs using the admin panel.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PRODUCT MODAL
+══════════════════════════════════════ -->
+<div class="overlay" id="pModal" onclick="handleModalBg(event)">
+  <div class="modal">
+    <div class="m-grid">
+      <!-- VIEWER -->
+      <div class="m-viewer" id="mViewer">
+        <!-- 2D PAN/ZOOM/ROTATE viewport -->
+        <div id="imgViewport" style="display:none">
+          <img id="m2dImg" src="" alt="">
+        </div>
+
+        <!-- 360 wrap -->
+        <div id="m360Wrap" style="display:none;width:100%;height:100%;position:relative">
+          <canvas id="threeCanvas"></canvas>
+          <div class="drag-hint" id="dragHint">🔄 Drag to rotate</div>
+        </div>
+
+        <div class="m-viewer-placeholder" id="mPlaceholder">💍</div>
+
+        <!-- Expand to fullscreen -->
+        <button class="expand-btn" id="expandBtn" title="View fullscreen" onclick="openFullscreen()">⛶</button>
+
+        <!-- 2D Viewer toolbar -->
+        <div class="viewer-controls" id="viewerControls" style="display:none">
+          <button class="vc-btn" title="Zoom In"      onclick="vctrl('zi')">＋</button>
+          <button class="vc-btn" title="Zoom Out"     onclick="vctrl('zo')">－</button>
+          <span class="zoom-val" id="zoomVal">100%</span>
+          <div class="vc-sep"></div>
+          <button class="vc-btn" title="Rotate Left"  onclick="vctrl('rl')">↺</button>
+          <button class="vc-btn" title="Rotate Right" onclick="vctrl('rr')">↻</button>
+          <div class="vc-sep"></div>
+          <button class="vc-btn" title="Reset View"   onclick="vctrl('rs')" style="font-size:0.75rem">⟲</button>
+        </div>
+
+        <div class="view-toggle" id="vToggle" style="display:none">
+          <button class="vtbtn active" id="vt2d" onclick="setView('2d')">📷 2D</button>
+          <button class="vtbtn" id="vt360" onclick="setView('360')">🔄 360°</button>
+        </div>
+        <div class="badge badge-360" id="m360Badge" style="display:none">360°</div>
+      </div>
+
+      <!-- INFO -->
+      <div class="m-info">
+        <div class="m-top">
+          <div>
+            <div class="m-cat" id="mCat"></div>
+            <div class="m-title" id="mTitle"></div>
+          </div>
+          <button class="close-btn" onclick="closeModal()">✕</button>
+        </div>
+
+        <div id="mRef" class="m-ref" style="display:none"></div>
+
+        <div class="d-grid" id="mDetails"></div>
+
+        <div id="mNotesWrap" style="display:none">
+          <div class="d-notes">
+            <div class="d-label">Notes</div>
+            <div class="d-val" id="mNotesText" style="margin-top:0.2rem;line-height:1.5"></div>
+          </div>
+        </div>
+
+        <!-- Supplier -->
+        <div class="supplier-box">
+          <div class="supplier-head">🔐 Supplier Information</div>
+          <div class="supplier-desc">Enter the access key to view confidential supplier details</div>
+          <div class="key-row">
+            <input type="password" class="inp" id="supKey" placeholder="Enter access key…">
+            <button class="btn btn-gold" onclick="revealSup()">Reveal</button>
+          </div>
+          <div id="supDetails" style="display:none"></div>
+        </div>
+
+        <div class="m-actions">
+          <button class="btn btn-wa" onclick="enquireWA()">📱 Enquire on WhatsApp</button>
+          <button class="btn btn-outline" onclick="closeModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     ADMIN OVERLAY
+══════════════════════════════════════ -->
+<div class="admin-ov" id="adminOv">
+
+  <!-- AUTH SCREEN -->
+  <div class="auth-wrap" id="authWrap">
+    <div style="text-align:center">
+      <div style="font-size:3rem;margin-bottom:0.75rem">⚙️</div>
+      <h2 style="font-family:'Playfair Display',serif;color:var(--gold);font-size:1.5rem">Admin Panel</h2>
+      <p style="color:var(--muted);font-size:0.82rem;margin-top:0.4rem">Sri Lalitha Jewellery</p>
+    </div>
+    <div class="auth-card">
+      <h3>Login</h3>
+      <div class="fg">
+        <label class="fl">Admin Password</label>
+        <input type="password" class="inp inp-full" id="aPassInp"
+          placeholder="Enter password…"
+          onkeyup="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn btn-gold" style="width:100%;justify-content:center" onclick="doLogin()">Login</button>
+      <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:0.5rem" onclick="closeAdmin()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL (post-login) -->
+  <div id="adminPanel" style="display:none;flex-direction:column;height:100%">
+    <div class="admin-hdr">
+      <h2>⚙️ Admin Panel — Sri Lalitha Jewellery</h2>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+    </div>
+    <div class="admin-tabs-bar">
+      <button class="atab active" onclick="aTab('add')">➕ Add Design</button>
+      <button class="atab" onclick="aTab('manage')">📦 Manage Designs</button>
+      <button class="atab" onclick="aTab('cats')">🗂 Categories</button>
+      <button class="atab" onclick="aTab('settings')">🔧 Settings</button>
+    </div>
+    <div class="admin-body">
+
+      <!-- ── ADD DESIGN ── -->
+      <div class="apanel active" id="apanel-add">
+        <div class="sec-title-a" id="addPanelTitle">Add New Design</div>
+        <div class="fgrid">
+          <div class="fg">
+            <label class="fl">Design Name *</label>
+            <input type="text" class="inp inp-full" id="fn" placeholder="e.g. Lotus Ring Design">
+          </div>
+          <div class="fg">
+            <label class="fl">Design Code</label>
+            <input type="text" class="inp inp-full" id="fcode" placeholder="e.g. GR-001">
+          </div>
+          <div class="fg">
+            <label class="fl">Category *</label>
+            <select class="inp" id="fcat" onchange="refreshSubSelect()">
+              <option value="gold">Gold</option>
+              <option value="silver">Silver</option>
+              <option value="panchaloham">Panchaloham</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Sub-Category *</label>
+            <select class="inp" id="fsub"></select>
+          </div>
+          <div class="fg">
+            <label class="fl">Weight</label>
+            <input type="text" class="inp inp-full" id="fwt" placeholder="e.g. 5.2g">
+          </div>
+          <div class="fg">
+            <label class="fl">Purity / Karat</label>
+            <input type="text" class="inp inp-full" id="fpur" placeholder="e.g. 22K / 92.5%">
+          </div>
+          <div class="fg">
+            <label class="fl">Making Charge %</label>
+            <input type="text" class="inp inp-full" id="fmk" placeholder="e.g. 12%">
+          </div>
+          <div class="fg">
+            <label class="fl">Stone / Gemstone</label>
+            <input type="text" class="inp inp-full" id="fst" placeholder="e.g. Ruby, CZ, None">
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Catalogue Reference (visible to customers)</label>
+          <input type="text" class="inp inp-full" id="fcref" placeholder="e.g. Catalogue 3, Page 12">
+        </div>
+        <div class="fg">
+          <label class="fl">Additional Notes</label>
+          <textarea class="inp" id="fnotes" placeholder="Any extra details for customers…"></textarea>
+        </div>
+
+        <!-- Image uploads -->
+        <div class="fgrid" style="margin:0.5rem 0 1rem">
+          <div class="fg">
+            <label class="fl">2D Catalogue Photo</label>
+            <div class="up-area" id="up2dArea">
+              <input type="file" id="f2d" accept="image/*" onchange="handleImg(this,'p2d','p2dp')">
+              <div id="p2dp">
+                <div class="up-icon">📷</div>
+                <div class="up-text">Click to upload photo</div>
+              </div>
+              <img id="p2d" class="up-preview" style="display:none">
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">360° Image <span style="color:var(--muted)">(Optional)</span></label>
+            <div class="up-area" id="up360Area">
+              <input type="file" id="f360" accept="image/*" onchange="handleImg(this,'p360','p360p')">
+              <div id="p360p">
+                <div class="up-icon">🔄</div>
+                <div class="up-text">Upload equirectangular panorama image for 360° view</div>
+              </div>
+              <img id="p360" class="up-preview" style="display:none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Supplier (secret) -->
+        <div class="secret-box">
+          <div class="secret-box-head">🔐 Supplier Information — Confidential (not visible to customers)</div>
+          <div class="fgrid">
+            <div class="fg">
+              <label class="fl">Supplier / Manufacturer Name</label>
+              <input type="text" class="inp inp-full" id="ssup" placeholder="e.g. ABC Jewellers, Rajkot">
+            </div>
+            <div class="fg">
+              <label class="fl">Catalogue Number</label>
+              <input type="text" class="inp inp-full" id="scat" placeholder="e.g. CAT-2024-03">
+            </div>
+            <div class="fg">
+              <label class="fl">Page Number</label>
+              <input type="text" class="inp inp-full" id="spg" placeholder="e.g. 12">
+            </div>
+            <div class="fg">
+              <label class="fl">Item Number on Page</label>
+              <input type="text" class="inp inp-full" id="sitm" placeholder="e.g. Item 3 / Top-left">
+            </div>
+            <div class="fg">
+              <label class="fl">Supplier Contact / Phone</label>
+              <input type="text" class="inp inp-full" id="scon" placeholder="+91 9999 999 999">
+            </div>
+            <div class="fg">
+              <label class="fl">Supplier Location / City</label>
+              <input type="text" class="inp inp-full" id="sloc" placeholder="e.g. Chennai, Hyderabad">
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Supplier Notes</label>
+            <input type="text" class="inp inp-full" id="snotes" placeholder="Min order, special terms, etc.">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+          <button class="btn btn-gold" id="saveBtn" onclick="saveProduct()">💾 Save Design</button>
+          <button class="btn btn-outline" onclick="clearForm()">Clear Form</button>
+        </div>
+      </div>
+
+      <!-- ── MANAGE DESIGNS ── -->
+      <div class="apanel" id="apanel-manage">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem">
+          <div class="sec-title-a" style="margin-bottom:0;border:none">All Designs</div>
+          <select class="inp" id="mgrFilter" onchange="renderAdminList()" style="width:auto;padding:0.4rem 0.85rem;font-size:0.8rem">
+            <option value="">All Categories</option>
+            <option value="gold">Gold</option>
+            <option value="silver">Silver</option>
+            <option value="panchaloham">Panchaloham</option>
+          </select>
+        </div>
+        <div class="ap-grid" id="apList"></div>
+        <div id="apEmpty" style="display:none;text-align:center;padding:3rem;color:var(--muted)">
+          <div style="font-size:3rem;opacity:0.15;margin-bottom:1rem">📦</div>
+          <p>No designs found. Add from the Add Design tab.</p>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="apanel" id="apanel-settings">
+        <div class="sec-title-a">Settings</div>
+
+        <div class="sg">
+          <h3>🔒 Security</h3>
+          <div class="fgrid">
+            <div class="fg">
+              <label class="fl">New Admin Password</label>
+              <input type="password" class="inp inp-full" id="sAP" placeholder="Leave blank to keep current">
+            </div>
+            <div class="fg">
+              <label class="fl">New Supplier Access Key</label>
+              <input type="password" class="inp inp-full" id="sSK" placeholder="Leave blank to keep current">
+            </div>
+          </div>
+          <p style="font-size:0.72rem;color:var(--muted)">Current supplier key is used to reveal hidden supplier info on product cards.</p>
+        </div>
+
+        <div class="sg">
+          <h3>🏪 Shop Information</h3>
+          <div class="fgrid">
+            <div class="fg">
+              <label class="fl">WhatsApp Number</label>
+              <input type="text" class="inp inp-full" id="sWA" placeholder="+91 9999999999">
+            </div>
+            <div class="fg">
+              <label class="fl">Shop Address</label>
+              <input type="text" class="inp inp-full" id="sAdr" placeholder="Full shop address">
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-gold" onclick="saveSettings()">Save Settings</button>
+
+        <div class="sg" style="margin-top:2rem;border-color:rgba(192,57,43,0.35)">
+          <h3 style="color:#e74c3c">⚠️ Danger Zone</h3>
+          <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem">
+            Permanently delete all design data. Cannot be undone.
+          </p>
+          <button class="btn btn-danger btn-sm" onclick="nukeAll()">Delete All Designs</button>
+        </div>
+      </div>
+
+      <!-- ── CATEGORIES ── -->
+      <div class="apanel" id="apanel-cats">
+        <div class="sec-title-a">Manage Sub-Categories</div>
+        <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.6">
+          Add or remove sub-categories for each jewellery type. Sub-categories appear as filter tabs on the customer catalogue. Default sub-categories cannot be deleted, but you can add as many custom ones as you need.
+        </p>
+        <div id="catSections"></div>
+      </div>
+
+    </div><!-- /admin-body -->
+  </div><!-- /adminPanel -->
+</div><!-- /admin-ov -->
+
+<!-- ══════════════════════════════════════
+     FULLSCREEN IMAGE VIEWER
+══════════════════════════════════════ -->
+<div class="fs-overlay" id="fsOverlay">
+  <div class="fs-top">
+    <div class="fs-title" id="fsTitle"></div>
+    <button class="fs-close" onclick="closeFullscreen()">✕</button>
+  </div>
+  <div class="fs-viewport" id="fsViewport">
+    <img id="fsImg" src="" alt="">
+    <div class="fs-hint" id="fsHint">Pinch to zoom · Drag to pan · Twist to rotate</div>
+  </div>
+  <div class="fs-bar">
+    <button class="fs-btn" title="Zoom In"     onclick="fsctrl('zi')">＋</button>
+    <button class="fs-btn" title="Zoom Out"    onclick="fsctrl('zo')">－</button>
+    <span  class="fs-zoom" id="fsZoom">100%</span>
+    <div   class="fs-sep"></div>
+    <button class="fs-btn" title="Rotate Left" onclick="fsctrl('rl')">↺</button>
+    <button class="fs-btn" title="Rotate Right"onclick="fsctrl('rr')">↻</button>
+    <div   class="fs-sep"></div>
+    <button class="fs-btn" title="Reset"       onclick="fsctrl('rs')" style="font-size:0.8rem">⟲</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- THREE.JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════════
+const DEF_SETTINGS = {
+  adminPass: 'admin123',
+  supKey: 'supplier2024',
+  wa: '',
+  address: ''
+};
+
+const DEF_SUBCATS = {
+  gold:        ['Rings','Chains','Bracelets','Bangles','Anklets','Pendants','Earrings','Necklaces','Waist Chains','Toe Rings','Mangalsutra','Sets','Other'],
+  silver:      ['Rings','Chains','Bracelets','Bangles','Anklets','Pendants','Earrings','Necklaces','Waist Chains','Toe Rings','Mangalsutra','Sets','Other'],
+  panchaloham: ['Rings','Bangles','Pendants','Earrings','Sets','Other']
+};
+
+const DEF_SUBICONS = {
+  Rings:'💍',Chains:'⛓️',Bracelets:'📿',Bangles:'🔵',Anklets:'✨',
+  Pendants:'💎',Earrings:'👂',Necklaces:'📿','Waist Chains':'🌟',
+  'Toe Rings':'💍',Mangalsutra:'📿',Sets:'💎',Other:'✦'
+};
+
+const ICON_OPTIONS = ['💍','⛓️','📿','🔵','✨','💎','👂','🌟','👑','🌸','🦋','⭐','🔮','🌺','🎀','🏅','🌙','❤️','🔱','⚜️'];
+
+let D = { products:[], nid:1, settings:{...DEF_SETTINGS}, subcats: JSON.parse(JSON.stringify(DEF_SUBCATS)), subicons:{} };
+
+// legacy constant kept for fallback icon lookup
+const SUB_ICONS = DEF_SUBICONS;
+const CAT_LABEL = {gold:'Gold',silver:'Silver',panchaloham:'Panchaloham'};
+const CAT_ICON  = {gold:'✦',silver:'◈',panchaloham:'⬡'};
+
+// state
+let curCat  = 'gold';
+let curSub  = 'All';
+let curProd = null;
+let three   = null;
+let editId  = null;
+let loggedIn= false;
+let curView = '2d';
+
+function load(){
+  try{
+    const r = localStorage.getItem('slj');
+    if(r){
+      const p=JSON.parse(r);
+      D={...D,...p};
+      if(!D.settings) D.settings={...DEF_SETTINGS};
+      if(!D.subcats)  D.subcats=JSON.parse(JSON.stringify(DEF_SUBCATS));
+      // ensure all 3 cats exist
+      ['gold','silver','panchaloham'].forEach(c=>{
+        if(!D.subcats[c]) D.subcats[c]=[...DEF_SUBCATS[c]];
+      });
+      if(!D.subicons) D.subicons={};
+    }
+  }catch(e){}
+}
+function save(){
+  try{ localStorage.setItem('slj', JSON.stringify(D)); }
+  catch(e){ toast('Storage full — images may be too large','err'); }
+}
+
+// ═══════════════════════════════════════════════════
+//  NAV
+// ═══════════════════════════════════════════════════
+function pickCat(c){
+  curCat=c; curSub='All';
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.dataset.c===c));
+  document.getElementById('secTitle').textContent = CAT_LABEL[c]+' Designs';
+  document.getElementById('searchInp').value='';
+  renderSubs(); renderProducts();
+  document.getElementById('catalogueSection').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function pickSub(s){
+  curSub=s;
+  document.querySelectorAll('.sub-btn').forEach(b=>b.classList.toggle('active',b.textContent===s));
+  renderProducts();
+}
+function renderSubs(){
+  const allSubs = D.subcats[curCat] || [];
+  const used = new Set(D.products.filter(p=>p.cat===curCat).map(p=>p.sub));
+  // show All + any sub that exists in subcats (whether used or not)
+  const list = ['All', ...allSubs.filter(s => used.has(s) || allSubs.includes(s))];
+  // deduplicate while preserving order
+  const seen = new Set(); const deduped = [];
+  list.forEach(s=>{ if(!seen.has(s)){seen.add(s);deduped.push(s);} });
+  document.getElementById('subBar').innerHTML = deduped.map(s=>
+    `<button class="sub-btn${s===curSub?' active':''}" onclick="pickSub('${s.replace(/'/g,"\\'")}')">
+       ${s!=='All'?(getSubIcon(curCat,s)+' '):''}${s}
+     </button>`
+  ).join('');
+}
+function getSubIcon(cat, sub){
+  return (D.subicons&&D.subicons[cat+':'+sub]) || DEF_SUBICONS[sub] || '✦';
+}
+
+// ═══════════════════════════════════════════════════
+//  CATALOGUE GRID
+// ═══════════════════════════════════════════════════
+function getProducts(){
+  const q = document.getElementById('searchInp')?.value?.toLowerCase()||'';
+  return D.products.filter(p=>{
+    if(p.cat!==curCat) return false;
+    if(curSub!=='All'&&p.sub!==curSub) return false;
+    if(q && !p.name.toLowerCase().includes(q) && !(p.code||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+function renderProducts(){
+  const grid = document.getElementById('pGrid');
+  const emp  = document.getElementById('emptyEl');
+  const ps   = getProducts();
+  document.getElementById('secCount').textContent = ps.length ? `${ps.length} design${ps.length!==1?'s':''}` : '';
+  if(!ps.length){ grid.innerHTML=''; emp.style.display='block'; return; }
+  emp.style.display='none';
+  grid.innerHTML = ps.map((p,i)=>cardHTML(p,i)).join('');
+}
+function cardHTML(p, idx){
+  const has360 = !!p.img360;
+  const isNew  = Date.now()-new Date(p.ts).getTime() < 7*24*3600*1000;
+  const imgPart = p.img2d
+    ? `<img src="${p.img2d}" alt="${esc(p.name)}" loading="lazy">`
+    : `<div class="p-card-placeholder">${SUB_ICONS[p.sub]||'💍'}</div>`;
+  return `
+    <div class="p-card fade-up" onclick="openProd(${p.id})" style="animation-delay:${idx*0.05}s">
+      <div class="p-card-img-wrap">
+        ${imgPart}
+        ${has360?'<div class="badge badge-360">360°</div>':''}
+        ${isNew?'<div class="badge badge-new">New</div>':''}
+      </div>
+      <div class="p-card-body">
+        <div class="p-card-name">${esc(p.name)}</div>
+        <div class="p-card-tags">
+          ${p.wt?`<span class="tag">${esc(p.wt)}</span>`:''}
+          ${p.pur?`<span class="tag">${esc(p.pur)}</span>`:''}
+          ${p.stone?`<span class="tag">${esc(p.stone)}</span>`:''}
+          ${p.code?`<span class="tag-code">${esc(p.code)}</span>`:''}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+//  PRODUCT MODAL
+// ═══════════════════════════════════════════════════
+function openProd(id){
+  curProd = D.products.find(p=>p.id===id);
+  if(!curProd) return;
+  const p = curProd;
+
+  killThree(); curView='2d';
+
+  // Category
+  document.getElementById('mCat').textContent =
+    `${CAT_ICON[p.cat]} ${CAT_LABEL[p.cat].toUpperCase()} · ${p.sub.toUpperCase()}`;
+  document.getElementById('mTitle').textContent = p.name;
+
+  // Ref
+  const refEl = document.getElementById('mRef');
+  if(p.catref||p.code){
+    refEl.textContent = [p.catref&&`📋 ${p.catref}`, p.code&&`🏷 ${p.code}`].filter(Boolean).join('  ·  ');
+    refEl.style.display='inline-block';
+  }else{ refEl.style.display='none'; }
+
+  // Details
+  const rows=[];
+  if(p.wt)   rows.push(['Weight',p.wt]);
+  if(p.pur)  rows.push(['Purity / Karat',p.pur]);
+  if(p.mk)   rows.push(['Making Charge',p.mk]);
+  if(p.stone)rows.push(['Stone',p.stone]);
+  if(p.sub)  rows.push(['Type',p.sub]);
+  if(p.code) rows.push(['Design Code',p.code]);
+  document.getElementById('mDetails').innerHTML = rows.map(([l,v])=>
+    `<div class="d-item"><div class="d-label">${l}</div><div class="d-val">${esc(v)}</div></div>`
+  ).join('');
+
+  // Notes
+  if(p.notes){
+    document.getElementById('mNotesWrap').style.display='block';
+    document.getElementById('mNotesText').textContent=p.notes;
+  }else document.getElementById('mNotesWrap').style.display='none';
+
+  // Viewer
+  setupViewer(p);
+
+  // Supplier reset
+  document.getElementById('supKey').value='';
+  document.getElementById('supDetails').style.display='none';
+
+  document.getElementById('pModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function setupViewer(p){
+  const vp    = document.getElementById('imgViewport');
+  const img2d = document.getElementById('m2dImg');
+  const w360  = document.getElementById('m360Wrap');
+  const ph    = document.getElementById('mPlaceholder');
+  const vt    = document.getElementById('vToggle');
+  const b360  = document.getElementById('m360Badge');
+  const vc    = document.getElementById('viewerControls');
+
+  ph.style.display='none';
+  w360.style.display='none';
+  vp.style.display='none';
+  vc.style.display='none';
+
+  if(p.img2d){
+    img2d.src=p.img2d;
+    vp.style.display='flex';
+    vc.style.display='flex';
+    initPanZoom(vp, img2d);
+  }else{
+    ph.style.display='flex';
+    ph.textContent = SUB_ICONS[p.sub]||'💍';
+  }
+
+  const expandBtn = document.getElementById('expandBtn');
+  if(p.img2d){ expandBtn.style.display='flex'; }
+  else{ expandBtn.style.display='none'; }
+
+  if(p.img360){
+    vt.style.display='flex'; b360.style.display='block';
+    document.getElementById('vt2d').classList.add('active');
+    document.getElementById('vt360').classList.remove('active');
+  }else{ vt.style.display='none'; b360.style.display='none'; }
+}
+
+// ═══════════════════════════════════════════════════
+//  PAN / ZOOM / ROTATE ENGINE
+// ═══════════════════════════════════════════════════
+let pz = null; // current pan-zoom state + listeners
+
+function initPanZoom(container, img){
+  // Kill previous
+  killPanZoom();
+
+  let tx=0, ty=0, scale=1, rot=0;
+  const MIN=0.25, MAX=8;
+
+  // Fit image inside container on load
+  img.onload = fitImage;
+  if(img.complete && img.naturalWidth) fitImage();
+
+  function fitImage(){
+    const cw=container.clientWidth||container.offsetWidth||400;
+    const ch=container.clientHeight||container.offsetHeight||400;
+    const iw=img.naturalWidth||400, ih=img.naturalHeight||400;
+    const fit=Math.min(cw/iw, ch/ih, 1);
+    scale=fit; tx=0; ty=0; rot=0;
+    applyTransform(true);
+  }
+
+  function applyTransform(animate){
+    if(animate){
+      img.style.transition='transform 0.22s cubic-bezier(0.4,0,0.2,1)';
+    }else{
+      img.style.transition='none';
+    }
+    img.style.transform=`translate(${tx}px,${ty}px) rotate(${rot}deg) scale(${scale})`;
+    document.getElementById('zoomVal').textContent=Math.round(scale*100)+'%';
+  }
+
+  function clampTx(){
+    // Allow panning freely but clamp to prevent losing image entirely
+    const cw=container.clientWidth, ch=container.clientHeight;
+    const half=Math.max(cw,ch)*scale*0.5+60;
+    tx=Math.max(-half,Math.min(half,tx));
+    ty=Math.max(-half,Math.min(half,ty));
+  }
+
+  /* ─ MOUSE wheel zoom ─ */
+  function onWheel(e){
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? 1.12 : 0.89;
+    const newScale = Math.max(MIN, Math.min(MAX, scale * delta));
+    // zoom toward cursor
+    const rect=container.getBoundingClientRect();
+    const mx=e.clientX-rect.left-rect.width/2;
+    const my=e.clientY-rect.top-rect.height/2;
+    tx = mx - (mx - tx)*(newScale/scale);
+    ty = my - (my - ty)*(newScale/scale);
+    scale=newScale;
+    clampTx();
+    applyTransform(false);
+  }
+
+  /* ─ MOUSE drag ─ */
+  let dragging=false, dragSX=0, dragSY=0, baseTX=0, baseTY=0;
+  function onMD(e){
+    if(e.button!==0) return;
+    dragging=true; dragSX=e.clientX; dragSY=e.clientY;
+    baseTX=tx; baseTY=ty;
+    container.classList.add('dragging');
+  }
+  function onMM(e){
+    if(!dragging) return;
+    tx=baseTX+(e.clientX-dragSX);
+    ty=baseTY+(e.clientY-dragSY);
+    clampTx();
+    applyTransform(false);
+  }
+  function onMU(){ dragging=false; container.classList.remove('dragging'); }
+
+  /* ─ TOUCH ─ */
+  let t0=null; // first touch snapshot
+  let baseScale=1, baseRot=0, baseTx2=0, baseTy2=0;
+
+  function getTouchMid(t1,t2){
+    const rect=container.getBoundingClientRect();
+    return {
+      x:(t1.clientX+t2.clientX)/2-rect.left-rect.width/2,
+      y:(t1.clientY+t2.clientY)/2-rect.top-rect.height/2
+    };
+  }
+  function getTouchDist(t1,t2){
+    return Math.hypot(t1.clientX-t2.clientX, t1.clientY-t2.clientY);
+  }
+  function getTouchAngle(t1,t2){
+    return Math.atan2(t2.clientY-t1.clientY, t2.clientX-t1.clientX)*180/Math.PI;
+  }
+
+  function onTS(e){
+    if(e.touches.length===1){
+      t0={
+        type:'pan', sx:e.touches[0].clientX, sy:e.touches[0].clientY,
+        btx:tx, bty:ty
+      };
+    }else if(e.touches.length===2){
+      const [a,b]=[e.touches[0],e.touches[1]];
+      t0={
+        type:'pinch',
+        dist:getTouchDist(a,b),
+        angle:getTouchAngle(a,b),
+        mid:getTouchMid(a,b),
+        bScale:scale, bRot:rot, btx:tx, bty:ty
+      };
+    }
+  }
+  function onTM(e){
+    e.preventDefault();
+    if(!t0) return;
+    if(t0.type==='pan' && e.touches.length===1){
+      tx=t0.btx+(e.touches[0].clientX-t0.sx);
+      ty=t0.bty+(e.touches[0].clientY-t0.sy);
+      clampTx();
+      applyTransform(false);
+    }else if(t0.type==='pinch' && e.touches.length===2){
+      const [a,b]=[e.touches[0],e.touches[1]];
+      const newDist=getTouchDist(a,b);
+      const newAngle=getTouchAngle(a,b);
+      const newMid=getTouchMid(a,b);
+      const newScale=Math.max(MIN,Math.min(MAX, t0.bScale*(newDist/t0.dist)));
+      const dRot=newAngle-t0.angle;
+      // pan to follow midpoint
+      tx=t0.btx+(newMid.x-t0.mid.x);
+      ty=t0.bty+(newMid.y-t0.mid.y);
+      // zoom toward mid
+      tx = newMid.x - (t0.mid.x - t0.btx)*(newScale/t0.bScale);
+      ty = newMid.y - (t0.mid.y - t0.bty)*(newScale/t0.bScale);
+      scale=newScale;
+      rot=t0.bRot+dRot;
+      clampTx();
+      applyTransform(false);
+    }
+  }
+  function onTE(){ t0=null; }
+
+  /* ─ TOOLBAR controls ─ */
+  function ctrl(cmd){
+    switch(cmd){
+      case'zi': scale=Math.min(MAX,scale*1.35); clampTx(); applyTransform(true); break;
+      case'zo': scale=Math.max(MIN,scale/1.35); clampTx(); applyTransform(true); break;
+      case'rl': rot-=90; applyTransform(true); break;
+      case'rr': rot+=90; applyTransform(true); break;
+      case'rs': tx=0;ty=0;rot=0; scale=1; fitImage(); break;
+    }
+  }
+
+  // bind
+  container.addEventListener('wheel',onWheel,{passive:false});
+  container.addEventListener('mousedown',onMD);
+  window.addEventListener('mousemove',onMM);
+  window.addEventListener('mouseup',onMU);
+  container.addEventListener('touchstart',onTS,{passive:true});
+  container.addEventListener('touchmove',onTM,{passive:false});
+  container.addEventListener('touchend',onTE);
+
+  pz={ container, img, ctrl,
+    unbind(){
+      container.removeEventListener('wheel',onWheel);
+      container.removeEventListener('mousedown',onMD);
+      window.removeEventListener('mousemove',onMM);
+      window.removeEventListener('mouseup',onMU);
+      container.removeEventListener('touchstart',onTS);
+      container.removeEventListener('touchmove',onTM);
+      container.removeEventListener('touchend',onTE);
+    }
+  };
+}
+
+function killPanZoom(){
+  if(pz){ pz.unbind(); pz=null; }
+}
+
+function vctrl(cmd){
+  if(pz) pz.ctrl(cmd);
+}
+
+// ═══════════════════════════════════════════════════
+//  FULLSCREEN VIEWER
+// ═══════════════════════════════════════════════════
+let fsPz = null; // pan-zoom state for fullscreen
+
+function openFullscreen(){
+  if(!curProd || !curProd.img2d) return;
+
+  const overlay = document.getElementById('fsOverlay');
+  const img     = document.getElementById('fsImg');
+  const vp      = document.getElementById('fsViewport');
+  const title   = document.getElementById('fsTitle');
+  const hint    = document.getElementById('fsHint');
+
+  title.textContent = curProd.name;
+  img.src = curProd.img2d;
+  img.style.transform = '';
+
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Reset hint animation
+  hint.style.animation = 'none';
+  void hint.offsetWidth; // reflow
+  hint.style.animation = '';
+
+  // Init pan/zoom after a tiny delay so dimensions are ready
+  setTimeout(()=>{
+    killFsPz();
+    fsPz = initPanZoomFS(vp, img);
+  }, 60);
+}
+
+function closeFullscreen(){
+  document.getElementById('fsOverlay').classList.remove('open');
+  killFsPz();
+  // only restore body scroll if modal is not also open
+  if(!document.getElementById('pModal').classList.contains('open')){
+    document.body.style.overflow = '';
+  }
+}
+
+function killFsPz(){
+  if(fsPz){ fsPz.unbind(); fsPz=null; }
+}
+
+function fsctrl(cmd){
+  if(fsPz) fsPz.ctrl(cmd);
+}
+
+// Shared pan/zoom factory — works for both inline and fullscreen viewports
+function initPanZoomFS(container, img){
+  let tx=0, ty=0, scale=1, rot=0;
+  const MIN=0.2, MAX=12;
+  const zoomEl = document.getElementById('fsZoom');
+
+  img.onload = fitImg;
+  if(img.complete && img.naturalWidth) fitImg();
+
+  function fitImg(){
+    const cw=container.clientWidth||screen.width;
+    const ch=container.clientHeight||screen.height;
+    const iw=img.naturalWidth||cw, ih=img.naturalHeight||ch;
+    scale = Math.min(cw/iw, ch/ih, 1);
+    tx=0; ty=0; rot=0;
+    apply(true);
+  }
+
+  function apply(anim){
+    img.style.transition = anim ? 'transform 0.22s cubic-bezier(0.4,0,0.2,1)' : 'none';
+    img.style.transform  = `translate(${tx}px,${ty}px) rotate(${rot}deg) scale(${scale})`;
+    if(zoomEl) zoomEl.textContent = Math.round(scale*100)+'%';
+  }
+
+  function clamp(){
+    const half = Math.max(container.clientWidth, container.clientHeight)*scale*0.6 + 80;
+    tx = Math.max(-half, Math.min(half, tx));
+    ty = Math.max(-half, Math.min(half, ty));
+  }
+
+  // Mouse wheel
+  function onWheel(e){
+    e.preventDefault();
+    const d = e.deltaY < 0 ? 1.14 : 0.88;
+    const ns = Math.max(MIN, Math.min(MAX, scale*d));
+    const r  = container.getBoundingClientRect();
+    const mx = e.clientX - r.left - r.width/2;
+    const my = e.clientY - r.top  - r.height/2;
+    tx = mx - (mx-tx)*(ns/scale);
+    ty = my - (my-ty)*(ns/scale);
+    scale=ns; clamp(); apply(false);
+  }
+
+  // Mouse drag
+  let drag=false, dsx=0, dsy=0, btx=0, bty=0;
+  function onMD(e){
+    if(e.button!==0) return;
+    drag=true; dsx=e.clientX; dsy=e.clientY; btx=tx; bty=ty;
+    container.classList.add('dragging');
+  }
+  function onMM(e){
+    if(!drag) return;
+    tx=btx+(e.clientX-dsx); ty=bty+(e.clientY-dsy);
+    clamp(); apply(false);
+  }
+  function onMU(){ drag=false; container.classList.remove('dragging'); }
+
+  // Touch
+  let t0=null;
+  function getTD(a,b){ return Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY); }
+  function getTA(a,b){ return Math.atan2(b.clientY-a.clientY, b.clientX-a.clientX)*180/Math.PI; }
+  function getTM(a,b){
+    const r=container.getBoundingClientRect();
+    return { x:(a.clientX+b.clientX)/2-r.left-r.width/2,
+             y:(a.clientY+b.clientY)/2-r.top-r.height/2 };
+  }
+  function onTS(e){
+    if(e.touches.length===1){
+      t0={type:'pan',sx:e.touches[0].clientX,sy:e.touches[0].clientY,btx:tx,bty:ty};
+    }else if(e.touches.length===2){
+      const[a,b]=[e.touches[0],e.touches[1]];
+      t0={type:'pinch',dist:getTD(a,b),angle:getTA(a,b),mid:getTM(a,b),
+          bScale:scale,bRot:rot,btx:tx,bty:ty};
+    }
+  }
+  function onTM(e){
+    e.preventDefault();
+    if(!t0) return;
+    if(t0.type==='pan'&&e.touches.length===1){
+      tx=t0.btx+(e.touches[0].clientX-t0.sx);
+      ty=t0.bty+(e.touches[0].clientY-t0.sy);
+      clamp(); apply(false);
+    }else if(t0.type==='pinch'&&e.touches.length===2){
+      const[a,b]=[e.touches[0],e.touches[1]];
+      const nd=getTD(a,b), na=getTA(a,b), nm=getTM(a,b);
+      const ns=Math.max(MIN,Math.min(MAX, t0.bScale*(nd/t0.dist)));
+      tx = nm.x-(t0.mid.x-t0.btx)*(ns/t0.bScale);
+      ty = nm.y-(t0.mid.y-t0.bty)*(ns/t0.bScale);
+      scale=ns; rot=t0.bRot+(na-t0.angle);
+      clamp(); apply(false);
+    }
+  }
+  function onTE(){ t0=null; }
+
+  function ctrl(cmd){
+    switch(cmd){
+      case'zi': scale=Math.min(MAX,scale*1.4); clamp(); apply(true); break;
+      case'zo': scale=Math.max(MIN,scale/1.4); clamp(); apply(true); break;
+      case'rl': rot-=90; apply(true); break;
+      case'rr': rot+=90; apply(true); break;
+      case'rs': tx=0;ty=0;rot=0; fitImg(); break;
+    }
+  }
+
+  container.addEventListener('wheel', onWheel, {passive:false});
+  container.addEventListener('mousedown', onMD);
+  window.addEventListener('mousemove', onMM);
+  window.addEventListener('mouseup', onMU);
+  container.addEventListener('touchstart', onTS, {passive:true});
+  container.addEventListener('touchmove', onTM, {passive:false});
+  container.addEventListener('touchend', onTE);
+
+  return {
+    ctrl,
+    unbind(){
+      container.removeEventListener('wheel', onWheel);
+      container.removeEventListener('mousedown', onMD);
+      window.removeEventListener('mousemove', onMM);
+      window.removeEventListener('mouseup', onMU);
+      container.removeEventListener('touchstart', onTS);
+      container.removeEventListener('touchmove', onTM);
+      container.removeEventListener('touchend', onTE);
+    }
+  };
+}
+
+function setView(v){
+  curView=v;
+  const p=curProd;
+  const vp   = document.getElementById('imgViewport');
+  const img2d= document.getElementById('m2dImg');
+  const w360 = document.getElementById('m360Wrap');
+  const ph   = document.getElementById('mPlaceholder');
+  const vc   = document.getElementById('viewerControls');
+  document.getElementById('vt2d').classList.toggle('active',v==='2d');
+  document.getElementById('vt360').classList.toggle('active',v==='360');
+
+  if(v==='2d'){
+    killThree();
+    w360.style.display='none'; ph.style.display='none';
+    if(p.img2d){
+      vp.style.display='flex'; vc.style.display='flex';
+      initPanZoom(vp, img2d);
+    }else{
+      vp.style.display='none'; vc.style.display='none';
+      ph.style.display='flex'; ph.textContent=SUB_ICONS[p.sub]||'💍';
+    }
+  }else{
+    killPanZoom();
+    vp.style.display='none'; vc.style.display='none';
+    ph.style.display='none';
+    w360.style.display='block';
+    setTimeout(()=>init360(p.img360),80);
+  }
+}
+
+function closeModal(){
+  closeFullscreen();
+  document.getElementById('pModal').classList.remove('open');
+  document.body.style.overflow='';
+  killThree(); killPanZoom(); curProd=null;
+  const img=document.getElementById('m2dImg');
+  img.style.transform='';
+}
+function handleModalBg(e){ if(e.target===document.getElementById('pModal')) closeModal(); }
+
+function revealSup(){
+  const key=document.getElementById('supKey').value;
+  if(!curProd) return;
+  if(key===D.settings.supKey){
+    const s=curProd.sup||{};
+    const has=s.name||s.contact||s.cat||s.pg||s.itm||s.loc||s.notes;
+    const html = has ? `
+      <div class="supplier-info-revealed">
+        ${s.name?`<div class="s-row"><div class="s-label">Supplier</div><div>${esc(s.name)}</div></div>`:''}
+        ${s.loc?`<div class="s-row"><div class="s-label">Location</div><div>${esc(s.loc)}</div></div>`:''}
+        ${s.contact?`<div class="s-row"><div class="s-label">Contact</div><div>${esc(s.contact)}</div></div>`:''}
+        ${s.cat?`<div class="s-row"><div class="s-label">Catalogue No.</div><div>${esc(s.cat)}</div></div>`:''}
+        ${s.pg?`<div class="s-row"><div class="s-label">Page No.</div><div>${esc(s.pg)}</div></div>`:''}
+        ${s.itm?`<div class="s-row"><div class="s-label">Item No.</div><div>${esc(s.itm)}</div></div>`:''}
+        ${s.notes?`<div class="s-row"><div class="s-label">Notes</div><div>${esc(s.notes)}</div></div>`:''}
+      </div>` : `<div class="supplier-info-revealed" style="color:var(--muted)">No supplier info added for this design.</div>`;
+    document.getElementById('supDetails').innerHTML=html;
+    document.getElementById('supDetails').style.display='block';
+    toast('Supplier info revealed ✓','ok');
+  }else{
+    toast('Incorrect access key','err');
+    document.getElementById('supKey').value='';
+  }
+}
+
+function enquireWA(){
+  const p=curProd;
+  const phone=(D.settings.wa||'').replace(/\D/g,'');
+  const msg=`Hello Sri Lalitha Jewellery! 👋\n\nI'm interested in this design:\n*${p.name}*\n${p.sub} · ${CAT_LABEL[p.cat]}${p.code?`\nCode: ${p.code}`:''}${p.catref?`\nRef: ${p.catref}`:''}\n\nPlease share more details and availability. Thank you!`;
+  window.open(`https://wa.me/${phone||''}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+// ═══════════════════════════════════════════════════
+//  THREE.JS 360° VIEWER
+// ═══════════════════════════════════════════════════
+function init360(imgUrl){
+  const cont = document.getElementById('m360Wrap');
+  const canvas= document.getElementById('threeCanvas');
+  const w=cont.clientWidth, h=cont.clientHeight;
+
+  const renderer = new THREE.WebGLRenderer({canvas,antialias:true});
+  renderer.setSize(w,h);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(75,w/h,0.1,100);
+  camera.position.set(0,0,0.01);
+
+  const geo=new THREE.SphereGeometry(50,64,32);
+  geo.scale(-1,1,1);
+
+  const tex=new THREE.TextureLoader().load(imgUrl);
+  const mat=new THREE.MeshBasicMaterial({map:tex});
+  scene.add(new THREE.Mesh(geo,mat));
+
+  let drag=false, sx=0, sy=0, lon=0, lat=0, tlon=0, tlat=0, auto=true;
+  const hint=document.getElementById('dragHint');
+
+  function gx(e){return e.clientX||((e.touches||[])[0]||{}).clientX||0}
+  function gy(e){return e.clientY||((e.touches||[])[0]||{}).clientY||0}
+
+  function md(e){ drag=true; sx=gx(e); sy=gy(e); auto=false; if(hint)hint.style.opacity='0'; }
+  function mm(e){
+    if(!drag) return;
+    const nx=gx(e),ny=gy(e);
+    tlon-=(nx-sx)*0.3; tlat+=(ny-sy)*0.12;
+    tlat=Math.max(-85,Math.min(85,tlat));
+    sx=nx; sy=ny;
+  }
+  function mu(){ drag=false; }
+
+  canvas.addEventListener('mousedown',md);
+  canvas.addEventListener('touchstart',md,{passive:true});
+  window.addEventListener('mousemove',mm);
+  window.addEventListener('touchmove',mm,{passive:true});
+  window.addEventListener('mouseup',mu);
+  window.addEventListener('touchend',mu);
+
+  let aid;
+  function animate(){
+    aid=requestAnimationFrame(animate);
+    if(auto) tlon+=0.12;
+    lon+=(tlon-lon)*0.07;
+    lat+=(tlat-lat)*0.07;
+    const phi=THREE.MathUtils.degToRad(90-lat);
+    const theta=THREE.MathUtils.degToRad(lon);
+    camera.lookAt(
+      Math.sin(phi)*Math.cos(theta),
+      Math.cos(phi),
+      Math.sin(phi)*Math.sin(theta)
+    );
+    renderer.render(scene,camera);
+  }
+  animate();
+
+  three={ renderer, aid,
+    listeners:{ mm, mu, md,
+      tmm:mm, tmu:mu, tmd:md }
+  };
+}
+
+function killThree(){
+  if(!three) return;
+  cancelAnimationFrame(three.aid);
+  three.renderer.dispose();
+  window.removeEventListener('mousemove',three.listeners.mm);
+  window.removeEventListener('mouseup',three.listeners.mu);
+  window.removeEventListener('touchmove',three.listeners.tmm);
+  window.removeEventListener('touchend',three.listeners.tmu);
+  three=null;
+}
+
+// ═══════════════════════════════════════════════════
+//  ADMIN
+// ═══════════════════════════════════════════════════
+function openAdmin(){
+  document.getElementById('adminOv').classList.add('open');
+  if(loggedIn){
+    showAdminPanel();
+  }else{
+    document.getElementById('authWrap').style.display='flex';
+    document.getElementById('adminPanel').style.display='none';
+    setTimeout(()=>document.getElementById('aPassInp').focus(),300);
+  }
+}
+function closeAdmin(){
+  document.getElementById('adminOv').classList.remove('open');
+}
+function doLogin(){
+  const p=document.getElementById('aPassInp').value;
+  if(p===D.settings.adminPass){
+    loggedIn=true;
+    document.getElementById('aPassInp').value='';
+    showAdminPanel();
+    loadSettingsForm();
+  }else{
+    toast('Incorrect password','err');
+    document.getElementById('aPassInp').value='';
+  }
+}
+function showAdminPanel(){
+  document.getElementById('authWrap').style.display='none';
+  document.getElementById('adminPanel').style.display='flex';
+  refreshSubSelect();
+}
+function logout(){ loggedIn=false; closeAdmin(); }
+
+function aTab(t){
+  document.querySelectorAll('.atab').forEach((el,i)=>{
+    el.classList.toggle('active',['add','manage','cats','settings'][i]===t);
+  });
+  document.querySelectorAll('.apanel').forEach(el=>el.classList.remove('active'));
+  document.getElementById(`apanel-${t}`).classList.add('active');
+  if(t==='manage')  renderAdminList();
+  if(t==='settings')loadSettingsForm();
+  if(t==='cats')    renderCatPanel();
+}
+
+// ═══════════════════════════════════════════════════
+//  SUBCATEGORY MANAGEMENT
+// ═══════════════════════════════════════════════════
+let addSubFormCat = null; // which cat's form is open
+let selectedIcon  = {};   // per cat, currently picked icon
+
+function renderCatPanel(){
+  const wrap = document.getElementById('catSections');
+  const cats  = ['gold','silver','panchaloham'];
+  const labels= {gold:'✦ Gold',silver:'◈ Silver',panchaloham:'⬡ Panchaloham'};
+  wrap.innerHTML = cats.map(cat=>{
+    const subs = D.subcats[cat]||[];
+    const defs = DEF_SUBCATS[cat]||[];
+    const chips = subs.map(s=>{
+      const isDef = defs.includes(s);
+      const icon  = getSubIcon(cat,s);
+      const used  = D.products.some(p=>p.cat===cat&&p.sub===s);
+      return `<div class="sub-chip${isDef?' default':''}">
+        <span class="chip-icon">${icon}</span>
+        <span>${esc(s)}</span>
+        ${used?'<span title="Has designs" style="font-size:0.6rem;color:var(--gold);margin-left:2px">●</span>':''}
+        <button class="sub-chip-del" title="${isDef?'Default — cannot delete':'Delete sub-category'}"
+          onclick="delSubcat('${cat}','${s.replace(/'/g,"\\'")}')">✕</button>
+      </div>`;
+    }).join('') || `<div class="no-subs">No sub-categories yet</div>`;
+
+    return `<div class="cat-section">
+      <div class="cat-section-head">
+        <div class="cat-section-title">
+          ${labels[cat]}
+          <span class="cat-badge">${subs.length} sub-categories</span>
+        </div>
+        <button class="btn btn-gold btn-sm" onclick="toggleAddSubForm('${cat}')">+ Add Sub-Category</button>
+      </div>
+      <div class="sub-chips" id="chips-${cat}">${chips}</div>
+      <div class="add-sub-form" id="addform-${cat}">
+        <div style="font-size:0.72rem;color:var(--gold);font-weight:500;margin-bottom:0.5rem">Choose Icon</div>
+        <div class="icon-picker" id="ipicker-${cat}">
+          ${ICON_OPTIONS.map(ic=>`<div class="icon-opt${(selectedIcon[cat]||ICON_OPTIONS[0])===ic?' selected':''}"
+            onclick="pickIcon('${cat}','${ic}')">${ic}</div>`).join('')}
+        </div>
+        <div style="font-size:0.72rem;color:var(--gold);font-weight:500;margin:0.5rem 0 0.35rem">Sub-Category Name</div>
+        <div class="add-sub-row">
+          <input type="text" class="inp" id="subinp-${cat}" placeholder="e.g. Hair Pins, Nose Rings…"
+            style="flex:1"
+            onkeyup="if(event.key==='Enter')addSubcat('${cat}')">
+          <button class="btn btn-gold btn-sm" onclick="addSubcat('${cat}')">Add</button>
+          <button class="btn btn-outline btn-sm" onclick="toggleAddSubForm('${cat}')">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleAddSubForm(cat){
+  const form = document.getElementById(`addform-${cat}`);
+  const isOpen = form.classList.contains('open');
+  // close all forms
+  document.querySelectorAll('.add-sub-form').forEach(f=>f.classList.remove('open'));
+  if(!isOpen){
+    form.classList.add('open');
+    addSubFormCat=cat;
+    if(!selectedIcon[cat]) selectedIcon[cat]=ICON_OPTIONS[0];
+    setTimeout(()=>document.getElementById(`subinp-${cat}`)?.focus(),100);
+  }else{
+    addSubFormCat=null;
+  }
+}
+
+function pickIcon(cat, icon){
+  selectedIcon[cat]=icon;
+  document.querySelectorAll(`#ipicker-${cat} .icon-opt`).forEach(el=>{
+    el.classList.toggle('selected', el.textContent===icon);
+  });
+}
+
+function addSubcat(cat){
+  const inp = document.getElementById(`subinp-${cat}`);
+  const name = inp.value.trim();
+  if(!name){ toast('Please enter a sub-category name','err'); return; }
+  if(!D.subcats[cat]) D.subcats[cat]=[];
+  if(D.subcats[cat].includes(name)){ toast('Already exists','err'); return; }
+  D.subcats[cat].push(name);
+  // save icon
+  if(!D.subicons) D.subicons={};
+  D.subicons[cat+':'+name] = selectedIcon[cat]||ICON_OPTIONS[0];
+  save();
+  inp.value='';
+  renderCatPanel();
+  renderSubs();
+  refreshSubSelect();
+  toast(`"${name}" added to ${CAT_LABEL[cat]} ✓`,'ok');
+  // reopen form for this cat
+  setTimeout(()=>toggleAddSubForm(cat),50);
+}
+
+function delSubcat(cat, name){
+  const isDef = (DEF_SUBCATS[cat]||[]).includes(name);
+  if(isDef){ toast('Default sub-categories cannot be deleted','err'); return; }
+  const inUse = D.products.some(p=>p.cat===cat&&p.sub===name);
+  if(inUse){
+    if(!confirm(`"${name}" has designs assigned to it. Deleting this sub-category will not delete those designs, but they will no longer appear in the filter. Continue?`)) return;
+  }else{
+    if(!confirm(`Delete sub-category "${name}" from ${CAT_LABEL[cat]}?`)) return;
+  }
+  D.subcats[cat] = D.subcats[cat].filter(s=>s!==name);
+  if(D.subicons) delete D.subicons[cat+':'+name];
+  save();
+  renderCatPanel();
+  renderSubs();
+  refreshSubSelect();
+  toast(`"${name}" removed`,'ok');
+}
+
+// Rebuild the fsub <select> based on selected category in the add-design form
+function refreshSubSelect(keepVal){
+  const cat = document.getElementById('fcat')?.value || 'gold';
+  const sel = document.getElementById('fsub');
+  if(!sel) return;
+  const prev = keepVal || sel.value;
+  const subs = D.subcats[cat] || DEF_SUBCATS[cat] || [];
+  sel.innerHTML = subs.map(s=>`<option${s===prev?' selected':''}>${esc(s)}</option>`).join('');
+}
+
+// ═══════════════════════════════════════════════════
+//  PRODUCT CRUD
+// ═══════════════════════════════════════════════════
+function handleImg(input, prevId, placeholderId){
+  const file=input.files[0]; if(!file) return;
+  if(file.size>3*1024*1024) toast('Image is large (>3MB). Consider compressing.','err');
+  const r=new FileReader();
+  r.onload=e=>{
+    const prev=document.getElementById(prevId);
+    const ph=document.getElementById(placeholderId);
+    prev.src=e.target.result;
+    prev.style.display='block';
+    if(ph) ph.style.display='none';
+  };
+  r.readAsDataURL(file);
+}
+
+function saveProduct(){
+  const name=document.getElementById('fn').value.trim();
+  if(!name){ toast('Please enter a design name','err'); return; }
+
+  const get2d=()=>{ const i=document.getElementById('p2d'); return i.style.display!='none'?i.src:''; };
+  const get360=()=>{ const i=document.getElementById('p360'); return i.style.display!='none'?i.src:''; };
+
+  const prod={
+    id: editId || D.nid++,
+    name,
+    cat: document.getElementById('fcat').value,
+    sub: document.getElementById('fsub').value,
+    code: document.getElementById('fcode').value.trim(),
+    wt: document.getElementById('fwt').value.trim(),
+    pur: document.getElementById('fpur').value.trim(),
+    mk: document.getElementById('fmk').value.trim(),
+    stone: document.getElementById('fst').value.trim(),
+    catref: document.getElementById('fcref').value.trim(),
+    notes: document.getElementById('fnotes').value.trim(),
+    img2d: get2d(),
+    img360: get360(),
+    sup:{
+      name:  document.getElementById('ssup').value.trim(),
+      cat:   document.getElementById('scat').value.trim(),
+      pg:    document.getElementById('spg').value.trim(),
+      itm:   document.getElementById('sitm').value.trim(),
+      contact:document.getElementById('scon').value.trim(),
+      loc:   document.getElementById('sloc').value.trim(),
+      notes: document.getElementById('snotes').value.trim(),
+    },
+    ts: editId ? (D.products.find(p=>p.id===editId)||{}).ts||new Date().toISOString() : new Date().toISOString()
+  };
+
+  if(editId){
+    const idx=D.products.findIndex(p=>p.id===editId);
+    if(idx!==-1) D.products[idx]=prod;
+    editId=null;
+    document.getElementById('saveBtn').textContent='💾 Save Design';
+    document.getElementById('addPanelTitle').textContent='Add New Design';
+  }else{
+    D.products.push(prod);
+  }
+  save();
+  renderSubs(); renderProducts();
+  clearForm();
+  toast('Design saved successfully ✨','ok');
+}
+
+function editProd(id){
+  editId=id;
+  const p=D.products.find(p=>p.id===id);
+  if(!p) return;
+  aTab('add');
+  document.getElementById('addPanelTitle').textContent='Edit Design';
+  document.getElementById('saveBtn').textContent='✏️ Update Design';
+  document.getElementById('fn').value=p.name||'';
+  document.getElementById('fcat').value=p.cat||'gold';
+  refreshSubSelect(p.sub||'Rings');  // populate correct subs first
+  document.getElementById('fcode').value=p.code||'';
+  document.getElementById('fwt').value=p.wt||'';
+  document.getElementById('fpur').value=p.pur||'';
+  document.getElementById('fmk').value=p.mk||'';
+  document.getElementById('fst').value=p.stone||'';
+  document.getElementById('fcref').value=p.catref||'';
+  document.getElementById('fnotes').value=p.notes||'';
+
+  function loadPrev(imgData,prevId,phId){
+    const img=document.getElementById(prevId);
+    const ph=document.getElementById(phId);
+    if(imgData){ img.src=imgData; img.style.display='block'; if(ph)ph.style.display='none'; }
+    else{ img.style.display='none'; img.src=''; if(ph)ph.style.display='block'; }
+  }
+  loadPrev(p.img2d,'p2d','p2dp');
+  loadPrev(p.img360,'p360','p360p');
+
+  const s=p.sup||{};
+  document.getElementById('ssup').value=s.name||'';
+  document.getElementById('scat').value=s.cat||'';
+  document.getElementById('spg').value=s.pg||'';
+  document.getElementById('sitm').value=s.itm||'';
+  document.getElementById('scon').value=s.contact||'';
+  document.getElementById('sloc').value=s.loc||'';
+  document.getElementById('snotes').value=s.notes||'';
+
+  document.querySelector('.admin-body').scrollTop=0;
+}
+
+function delProd(id){
+  if(!confirm('Delete this design permanently?')) return;
+  D.products=D.products.filter(p=>p.id!==id);
+  save(); renderSubs(); renderProducts(); renderAdminList();
+  toast('Design deleted','ok');
+}
+
+function clearForm(){
+  editId=null;
+  document.getElementById('addPanelTitle').textContent='Add New Design';
+  document.getElementById('saveBtn').textContent='💾 Save Design';
+  ['fn','fcode','fwt','fpur','fmk','fst','fcref','fnotes','ssup','scat','spg','sitm','scon','sloc','snotes'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  document.getElementById('fcat').value='gold';
+  refreshSubSelect();
+  ['p2d','p360'].forEach(id=>{
+    const img=document.getElementById(id); img.style.display='none'; img.src='';
+  });
+  document.getElementById('p2dp').style.display='block';
+  document.getElementById('p360p').style.display='block';
+}
+
+function renderAdminList(){
+  const filter=document.getElementById('mgrFilter').value;
+  const list=document.getElementById('apList');
+  const emp=document.getElementById('apEmpty');
+  let ps=D.products;
+  if(filter) ps=ps.filter(p=>p.cat===filter);
+  if(!ps.length){ list.innerHTML=''; emp.style.display='block'; return; }
+  emp.style.display='none';
+  list.innerHTML=ps.map(p=>`
+    <div class="ap-card">
+      ${p.img2d?`<img src="${p.img2d}" alt="${esc(p.name)}">`:`<div class="ap-no-img">${SUB_ICONS[p.sub]||'💍'}</div>`}
+      <div class="ap-info">
+        <div class="ap-name" title="${esc(p.name)}">${esc(p.name)}</div>
+        <div class="ap-meta">${CAT_LABEL[p.cat]} · ${p.sub}${p.code?` · ${p.code}`:''}</div>
+        <div class="ap-acts">
+          <button class="btn btn-outline btn-sm" onclick="editProd(${p.id})">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="delProd(${p.id})">Del</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════════════
+function loadSettingsForm(){
+  const s=D.settings;
+  document.getElementById('sAP').value='';
+  document.getElementById('sSK').value='';
+  document.getElementById('sWA').value=s.wa||'';
+  document.getElementById('sAdr').value=s.address||'';
+}
+function saveSettings(){
+  const nap=document.getElementById('sAP').value;
+  const nsk=document.getElementById('sSK').value;
+  if(nap) D.settings.adminPass=nap;
+  if(nsk) D.settings.supKey=nsk;
+  D.settings.wa=document.getElementById('sWA').value;
+  D.settings.address=document.getElementById('sAdr').value;
+  save(); toast('Settings saved ✓','ok');
+}
+function nukeAll(){
+  if(!confirm('Delete ALL designs? This cannot be undone.')) return;
+  if(!confirm('Are you absolutely sure?')) return;
+  D.products=[]; D.nid=1; save();
+  renderSubs(); renderProducts(); renderAdminList();
+  toast('All data cleared','ok');
+}
+
+// ═══════════════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════════════
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg,type=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className=`toast ${type} show`;
+  clearTimeout(el._t); el._t=setTimeout(()=>el.className=`toast ${type}`,3000);
+}
+function scrollTop(){window.scrollTo({top:0,behavior:'smooth'})}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(document.getElementById('fsOverlay').classList.contains('open')){ closeFullscreen(); return; }
+    if(document.getElementById('pModal').classList.contains('open')) closeModal();
+    if(document.getElementById('adminOv').classList.contains('open') && !loggedIn) closeAdmin();
+  }
+});
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+load();
+
+// Seed with demo data if empty
+if(D.products.length===0){
+  const demo=[
+    {id:D.nid++,name:'Antique Lotus Ring',cat:'gold',sub:'Rings',code:'GR-001',wt:'4.2g',pur:'22K',mk:'12%',stone:'None',catref:'Catalogue 1, Page 3',notes:'Traditional lotus design, perfect for daily wear',img2d:'',img360:'',sup:{name:'Bharath Jewels',cat:'BJC-2024-01',pg:'3',itm:'Item 1',contact:'+91 98765 43210',loc:'Chennai',notes:'Min order 5 pcs'},ts:new Date().toISOString()},
+    {id:D.nid++,name:'Temple Necklace Set',cat:'gold',sub:'Necklaces',code:'GN-012',wt:'28.5g',pur:'22K',mk:'15%',stone:'Ruby, Emerald',catref:'Catalogue 2, Page 7',notes:'Handcrafted antique finish temple necklace',img2d:'',img360:'',sup:{name:'Dharani Crafts',cat:'DCH-08',pg:'7',itm:'Item 3',contact:'+91 87654 32109',loc:'Hyderabad',notes:''},ts:new Date(Date.now()-10*24*3600*1000).toISOString()},
+    {id:D.nid++,name:'Jhumka Earrings',cat:'gold',sub:'Earrings',code:'GE-045',wt:'8.1g',pur:'22K',mk:'18%',stone:'CZ',catref:'Catalogue 1, Page 11',notes:'Classic jhumka design with CZ stones',img2d:'',img360:'',sup:{name:'Bharath Jewels',cat:'BJC-2024-01',pg:'11',itm:'Item 5',contact:'+91 98765 43210',loc:'Chennai',notes:''},ts:new Date(Date.now()-15*24*3600*1000).toISOString()},
+    {id:D.nid++,name:'Filigree Bracelet',cat:'silver',sub:'Bracelets',code:'SB-007',wt:'12.8g',pur:'92.5%',mk:'18%',stone:'None',catref:'Catalogue 4, Page 15',notes:'Delicate filigree work, ideal for gifting',img2d:'',img360:'',sup:{name:'Rajkot Silver Co.',cat:'RSC-12',pg:'15',itm:'Item 2',contact:'+91 76543 21098',loc:'Rajkot',notes:''},ts:new Date(Date.now()-20*24*3600*1000).toISOString()},
+    {id:D.nid++,name:'Oxidised Anklets',cat:'silver',sub:'Anklets',code:'SA-019',wt:'22g',pur:'92.5%',mk:'14%',stone:'None',catref:'Catalogue 4, Page 22',notes:'Pair of oxidised silver anklets with ghungroo',img2d:'',img360:'',sup:{name:'Rajkot Silver Co.',cat:'RSC-12',pg:'22',itm:'Item 4',contact:'+91 76543 21098',loc:'Rajkot',notes:'Price includes pair'},ts:new Date(Date.now()-25*24*3600*1000).toISOString()},
+    {id:D.nid++,name:'Panchaloham Bangles Set',cat:'panchaloham',sub:'Bangles',code:'PB-003',wt:'85g',pur:'5 Metal Alloy',mk:'8%',stone:'None',catref:'Catalogue 6, Page 2',notes:'Set of 4 bangles — traditional panchaloham composition',img2d:'',img360:'',sup:{name:'Coimbatore Metals',cat:'CMF-06',pg:'2',itm:'Item 1',contact:'+91 65432 10987',loc:'Coimbatore',notes:'Set of 4'},ts:new Date(Date.now()-30*24*3600*1000).toISOString()},
+    {id:D.nid++,name:'Panchaloham Rings Set',cat:'panchaloham',sub:'Rings',code:'PR-008',wt:'12g',pur:'5 Metal Alloy',mk:'6%',stone:'None',catref:'Catalogue 6, Page 5',notes:'Set of 9 rings for all fingers',img2d:'',img360:'',sup:{name:'Coimbatore Metals',cat:'CMF-06',pg:'5',itm:'Item 2',contact:'+91 65432 10987',loc:'Coimbatore',notes:'Navagraha set'},ts:new Date(Date.now()-35*24*3600*1000).toISOString()},
+  ];
+  D.products=demo; save();
+}
+
+renderSubs();
+renderProducts();
+</script>
+</body>
+</html>
