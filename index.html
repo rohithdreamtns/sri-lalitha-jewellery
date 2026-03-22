@@ -934,9 +934,40 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
   display:none;
 }
 .add-sub-form.open{display:block}
+
+/* Upload progress */
+.up-progress{height:3px;background:var(--border);border-radius:2px;margin-top:0.5rem;overflow:hidden;display:none}
+.up-progress-bar{height:100%;background:linear-gradient(90deg,var(--gold-l),var(--gold));width:0%;transition:width 0.3s}
+.up-progress.active{display:block}
+/* Fullscreen viewer */
+.fs-overlay{position:fixed;inset:0;z-index:2000;background:#000;display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity 0.25s var(--ease),visibility 0.25s}
+.fs-overlay.open{opacity:1;visibility:visible}
+.fs-top{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0.6rem 1rem;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,0.06)}
+.fs-title{font-family:'Playfair Display',serif;font-size:0.95rem;color:rgba(255,255,255,0.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70vw}
+.fs-close{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.2s}
+.fs-close:hover{background:rgba(255,255,255,0.16)}
+.fs-viewport{flex:1;overflow:hidden;position:relative;cursor:grab;display:flex;align-items:center;justify-content:center;touch-action:none}
+.fs-viewport.dragging{cursor:grabbing}
+.fs-viewport img{display:block;transform-origin:center center;user-select:none;-webkit-user-drag:none;pointer-events:none;max-width:none}
+.fs-bar{flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:0.4rem;padding:0.6rem 1rem;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,0.06)}
+.fs-btn{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s,color 0.15s,border-color 0.15s}
+.fs-btn:hover{background:rgba(201,168,100,0.2);color:var(--gold);border-color:var(--gold)}
+.fs-sep{width:1px;height:22px;background:rgba(255,255,255,0.1);margin:0 0.2rem}
+.fs-zoom{font-size:0.72rem;color:rgba(255,255,255,0.4);min-width:44px;text-align:center;letter-spacing:0.04em;user-select:none}
+.fs-hint{position:absolute;bottom:5rem;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);color:rgba(255,255,255,0.45);font-size:0.7rem;padding:0.3rem 0.85rem;border-radius:20px;pointer-events:none;white-space:nowrap;animation:hintFade 2.5s ease 0.8s both}
+@keyframes hintFade{0%{opacity:0}20%{opacity:1}75%{opacity:1}100%{opacity:0}}
+.btn-gold:disabled{opacity:0.6;cursor:not-allowed!important;transform:none!important}
 </style>
 </head>
 <body>
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOv" style="position:fixed;inset:0;z-index:9000;background:#06060A;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.25rem;transition:opacity 0.5s">
+  <div style="font-size:3rem;animation:gemFloat 1s ease-in-out infinite">&#x1F48E;</div>
+  <div style="font-size:0.82rem;color:#7A7A8A;letter-spacing:0.1em;font-family:Jost,sans-serif">Connecting to Firebase&hellip;</div>
+</div>
+<style>#loadingOv.hidden{opacity:0;pointer-events:none}</style>
+
 
 <!-- HEADER -->
 <header>
@@ -1100,13 +1131,17 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
     </div>
     <div class="auth-card">
       <h3>Login</h3>
+      <p style="font-size:0.72rem;color:var(--muted);text-align:center;margin-bottom:1.25rem;line-height:1.5">Use your Firebase Authentication credentials</p>
       <div class="fg">
-        <label class="fl">Admin Password</label>
-        <input type="password" class="inp inp-full" id="aPassInp"
-          placeholder="Enter password…"
-          onkeyup="if(event.key==='Enter')doLogin()">
+        <label class="fl">Email</label>
+        <input type="email" class="inp inp-full" id="aEmailInp" placeholder="admin@example.com" onkeyup="if(event.key==='Enter')doLogin()">
       </div>
-      <button class="btn btn-gold" style="width:100%;justify-content:center" onclick="doLogin()">Login</button>
+      <div class="fg">
+        <label class="fl">Password</label>
+        <input type="password" class="inp inp-full" id="aPassInp" placeholder="Enter password…" onkeyup="if(event.key==='Enter')doLogin()">
+      </div>
+      <div id="loginErr" style="font-size:0.75rem;color:#e74c3c;margin-bottom:0.75rem;display:none"></div>
+      <button class="btn btn-gold" style="width:100%;justify-content:center" id="loginBtn" onclick="doLogin()">Login</button>
       <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:0.5rem" onclick="closeAdmin()">Cancel</button>
     </div>
   </div>
@@ -1115,7 +1150,10 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
   <div id="adminPanel" style="display:none;flex-direction:column;height:100%">
     <div class="admin-hdr">
       <h2>⚙️ Admin Panel — Sri Lalitha Jewellery</h2>
-      <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+      <div style="display:flex;align-items:center;gap:0.75rem">
+        <span id="adminEmailLabel" style="font-size:0.75rem;color:var(--muted)"></span>
+        <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+      </div>
     </div>
     <div class="admin-tabs-bar">
       <button class="atab active" onclick="aTab('add')">➕ Add Design</button>
@@ -1187,6 +1225,7 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
               </div>
               <img id="p2d" class="up-preview" style="display:none">
             </div>
+            <div class="up-progress" id="prog2d"><div class="up-progress-bar" id="progBar2d"></div></div>
           </div>
           <div class="fg">
             <label class="fl">360° Image <span style="color:var(--muted)">(Optional)</span></label>
@@ -1198,6 +1237,7 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
               </div>
               <img id="p360" class="up-preview" style="display:none">
             </div>
+            <div class="up-progress" id="prog360"><div class="up-progress-bar" id="progBar360"></div></div>
           </div>
         </div>
 
@@ -1239,6 +1279,7 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
         <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
           <button class="btn btn-gold" id="saveBtn" onclick="saveProduct()">💾 Save Design</button>
           <button class="btn btn-outline" onclick="clearForm()">Clear Form</button>
+          <span id="saveStatus" style="font-size:0.75rem;color:var(--muted)"></span>
         </div>
       </div>
 
@@ -1266,17 +1307,16 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
 
         <div class="sg">
           <h3>🔒 Security</h3>
-          <div class="fgrid">
-            <div class="fg">
-              <label class="fl">New Admin Password</label>
-              <input type="password" class="inp inp-full" id="sAP" placeholder="Leave blank to keep current">
-            </div>
-            <div class="fg">
-              <label class="fl">New Supplier Access Key</label>
-              <input type="password" class="inp inp-full" id="sSK" placeholder="Leave blank to keep current">
-            </div>
+          <div style="background:rgba(201,168,100,0.05);border:1px solid var(--border-g);border-radius:var(--rs);padding:0.75rem;font-size:0.75rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">
+            <strong style="color:var(--gold)">Admin password</strong> is managed in your Firebase Console → Authentication → Users.<br>
+            Use the button below to send a password reset email to your admin account.
           </div>
-          <p style="font-size:0.72rem;color:var(--muted)">Current supplier key is used to reveal hidden supplier info on product cards.</p>
+          <button class="btn btn-outline btn-sm" onclick="sendPwReset()" style="margin-bottom:1.25rem">📧 Send Password Reset Email</button>
+          <div class="fg">
+            <label class="fl">New Supplier Access Key</label>
+            <input type="text" class="inp inp-full" id="sSK" placeholder="Enter new key (leave blank to keep current)">
+            <p style="font-size:0.68rem;color:var(--muted);margin-top:0.35rem">Share this key only with trusted staff members who need to see supplier details.</p>
+          </div>
         </div>
 
         <div class="sg">
@@ -1344,621 +1384,282 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- THREE.JS -->
+<!-- Firebase SDKs (v10 compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<!-- Three.js for 360 viewer -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
+<!-- LOADING OVERLAY (injected before body content via script) -->
+<div id="loadingOv" style="position:fixed;inset:0;z-index:9000;background:#06060A;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.25rem;transition:opacity 0.5s">
+  <div style="font-size:3rem;animation:gemFloat 1s ease-in-out infinite">&#x1F48E;</div>
+  <div style="font-size:0.82rem;color:#7A7A8A;letter-spacing:0.1em;font-family:Jost,sans-serif">Connecting to Firebase&#x2026;</div>
+</div>
+
+<style>
+#loadingOv.hidden{opacity:0;pointer-events:none}
+.btn-gold:disabled{opacity:0.6;cursor:not-allowed;transform:none!important}
+.up-progress{height:3px;background:var(--border);border-radius:2px;margin-top:0.5rem;overflow:hidden;display:none}
+.up-progress-bar{height:100%;background:linear-gradient(90deg,var(--gold-l),var(--gold));width:0%;transition:width 0.3s}
+.up-progress.active{display:block}
+.info-note{background:rgba(201,168,100,0.05);border:1px solid var(--border-g);border-radius:var(--rs);padding:0.75rem;font-size:0.75rem;color:var(--muted);line-height:1.6;margin-bottom:1rem}
+.info-note strong{color:var(--gold)}
+</style>
+
 <script>
-// ═══════════════════════════════════════════════════
-//  DATA
-// ═══════════════════════════════════════════════════
-const DEF_SETTINGS = {
-  adminPass: 'admin123',
-  supKey: 'supplier2024',
-  wa: '',
-  address: ''
+/*
+ FIREBASE SECURITY RULES
+ ========================
+ Set these in your Firebase Console:
+
+ FIRESTORE (Console > Firestore > Rules):
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /products/{id} {
+         allow read: if true;
+         allow write: if request.auth != null;
+       }
+       match /settings/{id} {
+         allow read: if true;
+         allow write: if request.auth != null;
+       }
+     }
+   }
+
+ STORAGE (Console > Storage > Rules):
+   rules_version = '2';
+   service firebase.storage {
+     match /b/{bucket}/o {
+       match /{allPaths=**} {
+         allow read: if true;
+         allow write: if request.auth != null;
+       }
+     }
+   }
+*/
+
+// === FIREBASE CONFIG ===
+const firebaseConfig = {
+  apiKey: "AIzaSyBsOPnIBSJx0dv18oKVklsRjLb3gbVPcMo",
+  authDomain: "sri-lalitha-27501.firebaseapp.com",
+  projectId: "sri-lalitha-27501",
+  storageBucket: "sri-lalitha-27501.firebasestorage.app",
+  messagingSenderId: "173748940125",
+  appId: "1:173748940125:web:5887976395f2065ffc8cb4",
+  measurementId: "G-SR2LDPREGC"
 };
 
+firebase.initializeApp(firebaseConfig);
+const db      = firebase.firestore();
+const auth    = firebase.auth();
+const storage = firebase.storage();
+// Firestore offline persistence - keeps catalogue working even with brief internet drops
+db.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+
+// === CONSTANTS & DEFAULTS ===
+const DEF_SETTINGS = {supKey:'supplier2024',wa:'',address:''};
 const DEF_SUBCATS = {
   gold:        ['Rings','Chains','Bracelets','Bangles','Anklets','Pendants','Earrings','Necklaces','Waist Chains','Toe Rings','Mangalsutra','Sets','Other'],
   silver:      ['Rings','Chains','Bracelets','Bangles','Anklets','Pendants','Earrings','Necklaces','Waist Chains','Toe Rings','Mangalsutra','Sets','Other'],
   panchaloham: ['Rings','Bangles','Pendants','Earrings','Sets','Other']
 };
-
 const DEF_SUBICONS = {
-  Rings:'💍',Chains:'⛓️',Bracelets:'📿',Bangles:'🔵',Anklets:'✨',
-  Pendants:'💎',Earrings:'👂',Necklaces:'📿','Waist Chains':'🌟',
-  'Toe Rings':'💍',Mangalsutra:'📿',Sets:'💎',Other:'✦'
+  Rings:'\u{1F48D}',Chains:'\u26D3\uFE0F',Bracelets:'\u{1F4FF}',Bangles:'\u{1F535}',Anklets:'\u2728',
+  Pendants:'\u{1F48E}',Earrings:'\u{1F442}',Necklaces:'\u{1F4FF}','Waist Chains':'\u{1F31F}',
+  'Toe Rings':'\u{1F48D}',Mangalsutra:'\u{1F4FF}',Sets:'\u{1F48E}',Other:'\u2736'
 };
-
-const ICON_OPTIONS = ['💍','⛓️','📿','🔵','✨','💎','👂','🌟','👑','🌸','🦋','⭐','🔮','🌺','🎀','🏅','🌙','❤️','🔱','⚜️'];
-
-let D = { products:[], nid:1, settings:{...DEF_SETTINGS}, subcats: JSON.parse(JSON.stringify(DEF_SUBCATS)), subicons:{} };
-
-// legacy constant kept for fallback icon lookup
-const SUB_ICONS = DEF_SUBICONS;
+const ICON_OPTIONS = ['\u{1F48D}','\u26D3\uFE0F','\u{1F4FF}','\u{1F535}','\u2728','\u{1F48E}','\u{1F442}','\u{1F31F}','\u{1F451}','\u{1F338}','\u{1F98B}','\u2B50','\u{1F52E}','\u{1F33A}','\u{1F380}','\u{1F3C5}','\u{1F319}','\u2764\uFE0F','\u{1F531}','\u269C\uFE0F}'];
 const CAT_LABEL = {gold:'Gold',silver:'Silver',panchaloham:'Panchaloham'};
-const CAT_ICON  = {gold:'✦',silver:'◈',panchaloham:'⬡'};
+const CAT_ICON  = {gold:'\u2736',silver:'\u25C8',panchaloham:'\u2B21'};
+const SUB_ICONS = DEF_SUBICONS;
 
-// state
-let curCat  = 'gold';
-let curSub  = 'All';
-let curProd = null;
-let three   = null;
-let editId  = null;
-let loggedIn= false;
-let curView = '2d';
+// === APP STATE ===
+let D = {products:[],settings:{...DEF_SETTINGS},subcats:JSON.parse(JSON.stringify(DEF_SUBCATS)),subicons:{}};
+let curCat='gold',curSub='All',curProd=null,three=null,editId=null;
+let editImg2d='',editImg360='',loggedIn=false,curView='2d';
+let unsubProducts=null,addSubFormCat=null,selectedIcon={};
+let pz=null,fsPz=null;
 
-function load(){
+// === INIT ===
+async function initApp(){
   try{
-    const r = localStorage.getItem('slj');
-    if(r){
-      const p=JSON.parse(r);
-      D={...D,...p};
-      if(!D.settings) D.settings={...DEF_SETTINGS};
-      if(!D.subcats)  D.subcats=JSON.parse(JSON.stringify(DEF_SUBCATS));
-      // ensure all 3 cats exist
-      ['gold','silver','panchaloham'].forEach(c=>{
-        if(!D.subcats[c]) D.subcats[c]=[...DEF_SUBCATS[c]];
-      });
-      if(!D.subicons) D.subicons={};
-    }
-  }catch(e){}
-}
-function save(){
-  try{ localStorage.setItem('slj', JSON.stringify(D)); }
-  catch(e){ toast('Storage full — images may be too large','err'); }
+    await loadSettings();
+    startProductsListener();
+    auth.onAuthStateChanged(user=>{
+      loggedIn=!!user;
+      if(user&&document.getElementById('adminPanel').style.display!=='none'){
+        document.getElementById('adminEmailLabel').textContent=user.email||'';
+      }
+    });
+  }catch(e){console.error('Init:',e);}
+  finally{hideLoading();}
 }
 
-// ═══════════════════════════════════════════════════
-//  NAV
-// ═══════════════════════════════════════════════════
+function hideLoading(){
+  const ov=document.getElementById('loadingOv');
+  ov.classList.add('hidden');
+  setTimeout(()=>ov.style.display='none',500);
+}
+
+async function loadSettings(){
+  try{
+    const doc=await db.collection('settings').doc('main').get();
+    if(doc.exists){
+      const d=doc.data();
+      D.settings={...DEF_SETTINGS,...d.settings};
+      D.subcats=d.subcats||JSON.parse(JSON.stringify(DEF_SUBCATS));
+      D.subicons=d.subicons||{};
+      ['gold','silver','panchaloham'].forEach(c=>{if(!D.subcats[c])D.subcats[c]=[...DEF_SUBCATS[c]];});
+    }else{
+      await saveSettingsToFS();
+    }
+  }catch(e){console.warn('Settings load failed:',e);}
+}
+
+async function saveSettingsToFS(){
+  await db.collection('settings').doc('main').set({settings:D.settings,subcats:D.subcats,subicons:D.subicons});
+}
+
+function startProductsListener(){
+  if(unsubProducts)unsubProducts();
+  unsubProducts=db.collection('products').orderBy('ts','desc').onSnapshot(snap=>{
+    D.products=snap.docs.map(doc=>{
+      const d=doc.data();
+      return{...d,id:doc.id,ts:d.ts?.toDate?.()?.toISOString()||new Date().toISOString()};
+    });
+    renderSubs();renderProducts();
+    if(document.getElementById('apanel-manage').classList.contains('active'))renderAdminList();
+  },err=>console.error('Products listener:',err));
+}
+
+// === NAVIGATION ===
 function pickCat(c){
-  curCat=c; curSub='All';
+  curCat=c;curSub='All';
   document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.dataset.c===c));
-  document.getElementById('secTitle').textContent = CAT_LABEL[c]+' Designs';
+  document.getElementById('secTitle').textContent=CAT_LABEL[c]+' Designs';
   document.getElementById('searchInp').value='';
-  renderSubs(); renderProducts();
+  renderSubs();renderProducts();
   document.getElementById('catalogueSection').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function pickSub(s){
   curSub=s;
-  document.querySelectorAll('.sub-btn').forEach(b=>b.classList.toggle('active',b.textContent===s));
+  document.querySelectorAll('.sub-btn').forEach(b=>b.classList.toggle('active',b.textContent.trim().includes(s)&&b.textContent.trim().endsWith(s)));
   renderProducts();
 }
+function scrollTop(){window.scrollTo({top:0,behavior:'smooth'});}
+
+// === RENDER ===
+function getSubIcon(cat,sub){return(D.subicons&&D.subicons[cat+':'+sub])||DEF_SUBICONS[sub]||'\u2736';}
+
 function renderSubs(){
-  const allSubs = D.subcats[curCat] || [];
-  const used = new Set(D.products.filter(p=>p.cat===curCat).map(p=>p.sub));
-  // show All + any sub that exists in subcats (whether used or not)
-  const list = ['All', ...allSubs.filter(s => used.has(s) || allSubs.includes(s))];
-  // deduplicate while preserving order
-  const seen = new Set(); const deduped = [];
-  list.forEach(s=>{ if(!seen.has(s)){seen.add(s);deduped.push(s);} });
-  document.getElementById('subBar').innerHTML = deduped.map(s=>
-    `<button class="sub-btn${s===curSub?' active':''}" onclick="pickSub('${s.replace(/'/g,"\\'")}')">
-       ${s!=='All'?(getSubIcon(curCat,s)+' '):''}${s}
-     </button>`
+  const allSubs=D.subcats[curCat]||[];
+  const seen=new Set();const deduped=['All'];
+  allSubs.forEach(s=>{if(!seen.has(s)){seen.add(s);deduped.push(s);}});
+  document.getElementById('subBar').innerHTML=deduped.map(s=>
+    '<button class="sub-btn'+(s===curSub?' active':'')+'" onclick="pickSub(\''+(s.replace(/'/g,"\\'"))+'\')">'+(s!=='All'?getSubIcon(curCat,s)+' ':'')+s+'</button>'
   ).join('');
 }
-function getSubIcon(cat, sub){
-  return (D.subicons&&D.subicons[cat+':'+sub]) || DEF_SUBICONS[sub] || '✦';
-}
 
-// ═══════════════════════════════════════════════════
-//  CATALOGUE GRID
-// ═══════════════════════════════════════════════════
 function getProducts(){
-  const q = document.getElementById('searchInp')?.value?.toLowerCase()||'';
+  const q=document.getElementById('searchInp')?.value?.toLowerCase()||'';
   return D.products.filter(p=>{
-    if(p.cat!==curCat) return false;
-    if(curSub!=='All'&&p.sub!==curSub) return false;
-    if(q && !p.name.toLowerCase().includes(q) && !(p.code||'').toLowerCase().includes(q)) return false;
+    if(p.cat!==curCat)return false;
+    if(curSub!=='All'&&p.sub!==curSub)return false;
+    if(q&&!p.name?.toLowerCase().includes(q)&&!(p.code||'').toLowerCase().includes(q))return false;
     return true;
   });
 }
+
 function renderProducts(){
-  const grid = document.getElementById('pGrid');
-  const emp  = document.getElementById('emptyEl');
-  const ps   = getProducts();
-  document.getElementById('secCount').textContent = ps.length ? `${ps.length} design${ps.length!==1?'s':''}` : '';
-  if(!ps.length){ grid.innerHTML=''; emp.style.display='block'; return; }
+  const grid=document.getElementById('pGrid');
+  const emp=document.getElementById('emptyEl');
+  const ps=getProducts();
+  document.getElementById('secCount').textContent=ps.length?ps.length+' design'+(ps.length!==1?'s':''):'';
+  if(!ps.length){grid.innerHTML='';emp.style.display='block';return;}
   emp.style.display='none';
-  grid.innerHTML = ps.map((p,i)=>cardHTML(p,i)).join('');
-}
-function cardHTML(p, idx){
-  const has360 = !!p.img360;
-  const isNew  = Date.now()-new Date(p.ts).getTime() < 7*24*3600*1000;
-  const imgPart = p.img2d
-    ? `<img src="${p.img2d}" alt="${esc(p.name)}" loading="lazy">`
-    : `<div class="p-card-placeholder">${SUB_ICONS[p.sub]||'💍'}</div>`;
-  return `
-    <div class="p-card fade-up" onclick="openProd(${p.id})" style="animation-delay:${idx*0.05}s">
-      <div class="p-card-img-wrap">
-        ${imgPart}
-        ${has360?'<div class="badge badge-360">360°</div>':''}
-        ${isNew?'<div class="badge badge-new">New</div>':''}
-      </div>
-      <div class="p-card-body">
-        <div class="p-card-name">${esc(p.name)}</div>
-        <div class="p-card-tags">
-          ${p.wt?`<span class="tag">${esc(p.wt)}</span>`:''}
-          ${p.pur?`<span class="tag">${esc(p.pur)}</span>`:''}
-          ${p.stone?`<span class="tag">${esc(p.stone)}</span>`:''}
-          ${p.code?`<span class="tag-code">${esc(p.code)}</span>`:''}
-        </div>
-      </div>
-    </div>`;
+  grid.innerHTML=ps.map((p,i)=>cardHTML(p,i)).join('');
 }
 
-// ═══════════════════════════════════════════════════
-//  PRODUCT MODAL
-// ═══════════════════════════════════════════════════
+function cardHTML(p,idx){
+  const has360=!!p.img360;
+  const isNew=Date.now()-new Date(p.ts).getTime()<7*24*3600*1000;
+  const imgPart=p.img2d
+    ?'<img src="'+p.img2d+'" alt="'+esc(p.name)+'" loading="lazy">'
+    :'<div class="p-card-placeholder">'+getSubIcon(p.cat,p.sub)+'</div>';
+  return '<div class="p-card fade-up" onclick="openProd(\''+(p.id)+'\')" style="animation-delay:'+(idx*0.05)+'s">'
+    +'<div class="p-card-img-wrap">'+imgPart
+    +(has360?'<div class="badge badge-360">360&#xB0;</div>':'')
+    +(isNew?'<div class="badge badge-new">New</div>':'')
+    +'</div><div class="p-card-body">'
+    +'<div class="p-card-name">'+esc(p.name)+'</div>'
+    +'<div class="p-card-tags">'
+    +(p.wt?'<span class="tag">'+esc(p.wt)+'</span>':'')
+    +(p.pur?'<span class="tag">'+esc(p.pur)+'</span>':'')
+    +(p.stone?'<span class="tag">'+esc(p.stone)+'</span>':'')
+    +(p.code?'<span class="tag-code">'+esc(p.code)+'</span>':'')
+    +'</div></div></div>';
+}
+
+// === PRODUCT MODAL ===
 function openProd(id){
-  curProd = D.products.find(p=>p.id===id);
-  if(!curProd) return;
-  const p = curProd;
-
-  killThree(); curView='2d';
-
-  // Category
-  document.getElementById('mCat').textContent =
-    `${CAT_ICON[p.cat]} ${CAT_LABEL[p.cat].toUpperCase()} · ${p.sub.toUpperCase()}`;
-  document.getElementById('mTitle').textContent = p.name;
-
-  // Ref
-  const refEl = document.getElementById('mRef');
+  curProd=D.products.find(p=>p.id===id);
+  if(!curProd)return;
+  const p=curProd;
+  killThree();killPanZoom();curView='2d';
+  document.getElementById('mCat').textContent=CAT_ICON[p.cat]+' '+CAT_LABEL[p.cat].toUpperCase()+' \u00B7 '+(p.sub||'').toUpperCase();
+  document.getElementById('mTitle').textContent=p.name;
+  const refEl=document.getElementById('mRef');
   if(p.catref||p.code){
-    refEl.textContent = [p.catref&&`📋 ${p.catref}`, p.code&&`🏷 ${p.code}`].filter(Boolean).join('  ·  ');
+    refEl.textContent=[p.catref&&'\u{1F4CB} '+p.catref,p.code&&'\u{1F3F7} '+p.code].filter(Boolean).join('  \u00B7  ');
     refEl.style.display='inline-block';
-  }else{ refEl.style.display='none'; }
-
-  // Details
+  }else{refEl.style.display='none';}
   const rows=[];
-  if(p.wt)   rows.push(['Weight',p.wt]);
-  if(p.pur)  rows.push(['Purity / Karat',p.pur]);
-  if(p.mk)   rows.push(['Making Charge',p.mk]);
-  if(p.stone)rows.push(['Stone',p.stone]);
-  if(p.sub)  rows.push(['Type',p.sub]);
-  if(p.code) rows.push(['Design Code',p.code]);
-  document.getElementById('mDetails').innerHTML = rows.map(([l,v])=>
-    `<div class="d-item"><div class="d-label">${l}</div><div class="d-val">${esc(v)}</div></div>`
-  ).join('');
-
-  // Notes
-  if(p.notes){
-    document.getElementById('mNotesWrap').style.display='block';
-    document.getElementById('mNotesText').textContent=p.notes;
-  }else document.getElementById('mNotesWrap').style.display='none';
-
-  // Viewer
+  if(p.wt)rows.push(['Weight',p.wt]);if(p.pur)rows.push(['Purity / Karat',p.pur]);
+  if(p.mk)rows.push(['Making Charge',p.mk]);if(p.stone)rows.push(['Stone',p.stone]);
+  if(p.sub)rows.push(['Type',p.sub]);if(p.code)rows.push(['Design Code',p.code]);
+  document.getElementById('mDetails').innerHTML=rows.map(([l,v])=>'<div class="d-item"><div class="d-label">'+l+'</div><div class="d-val">'+esc(v)+'</div></div>').join('');
+  if(p.notes){document.getElementById('mNotesWrap').style.display='block';document.getElementById('mNotesText').textContent=p.notes;}
+  else document.getElementById('mNotesWrap').style.display='none';
   setupViewer(p);
-
-  // Supplier reset
   document.getElementById('supKey').value='';
   document.getElementById('supDetails').style.display='none';
-
   document.getElementById('pModal').classList.add('open');
   document.body.style.overflow='hidden';
 }
 
 function setupViewer(p){
-  const vp    = document.getElementById('imgViewport');
-  const img2d = document.getElementById('m2dImg');
-  const w360  = document.getElementById('m360Wrap');
-  const ph    = document.getElementById('mPlaceholder');
-  const vt    = document.getElementById('vToggle');
-  const b360  = document.getElementById('m360Badge');
-  const vc    = document.getElementById('viewerControls');
-
-  ph.style.display='none';
-  w360.style.display='none';
-  vp.style.display='none';
-  vc.style.display='none';
-
-  if(p.img2d){
-    img2d.src=p.img2d;
-    vp.style.display='flex';
-    vc.style.display='flex';
-    initPanZoom(vp, img2d);
-  }else{
-    ph.style.display='flex';
-    ph.textContent = SUB_ICONS[p.sub]||'💍';
-  }
-
-  const expandBtn = document.getElementById('expandBtn');
-  if(p.img2d){ expandBtn.style.display='flex'; }
-  else{ expandBtn.style.display='none'; }
-
-  if(p.img360){
-    vt.style.display='flex'; b360.style.display='block';
-    document.getElementById('vt2d').classList.add('active');
-    document.getElementById('vt360').classList.remove('active');
-  }else{ vt.style.display='none'; b360.style.display='none'; }
-}
-
-// ═══════════════════════════════════════════════════
-//  PAN / ZOOM / ROTATE ENGINE
-// ═══════════════════════════════════════════════════
-let pz = null; // current pan-zoom state + listeners
-
-function initPanZoom(container, img){
-  // Kill previous
-  killPanZoom();
-
-  let tx=0, ty=0, scale=1, rot=0;
-  const MIN=0.25, MAX=8;
-
-  // Fit image inside container on load
-  img.onload = fitImage;
-  if(img.complete && img.naturalWidth) fitImage();
-
-  function fitImage(){
-    const cw=container.clientWidth||container.offsetWidth||400;
-    const ch=container.clientHeight||container.offsetHeight||400;
-    const iw=img.naturalWidth||400, ih=img.naturalHeight||400;
-    const fit=Math.min(cw/iw, ch/ih, 1);
-    scale=fit; tx=0; ty=0; rot=0;
-    applyTransform(true);
-  }
-
-  function applyTransform(animate){
-    if(animate){
-      img.style.transition='transform 0.22s cubic-bezier(0.4,0,0.2,1)';
-    }else{
-      img.style.transition='none';
-    }
-    img.style.transform=`translate(${tx}px,${ty}px) rotate(${rot}deg) scale(${scale})`;
-    document.getElementById('zoomVal').textContent=Math.round(scale*100)+'%';
-  }
-
-  function clampTx(){
-    // Allow panning freely but clamp to prevent losing image entirely
-    const cw=container.clientWidth, ch=container.clientHeight;
-    const half=Math.max(cw,ch)*scale*0.5+60;
-    tx=Math.max(-half,Math.min(half,tx));
-    ty=Math.max(-half,Math.min(half,ty));
-  }
-
-  /* ─ MOUSE wheel zoom ─ */
-  function onWheel(e){
-    e.preventDefault();
-    const delta = e.deltaY < 0 ? 1.12 : 0.89;
-    const newScale = Math.max(MIN, Math.min(MAX, scale * delta));
-    // zoom toward cursor
-    const rect=container.getBoundingClientRect();
-    const mx=e.clientX-rect.left-rect.width/2;
-    const my=e.clientY-rect.top-rect.height/2;
-    tx = mx - (mx - tx)*(newScale/scale);
-    ty = my - (my - ty)*(newScale/scale);
-    scale=newScale;
-    clampTx();
-    applyTransform(false);
-  }
-
-  /* ─ MOUSE drag ─ */
-  let dragging=false, dragSX=0, dragSY=0, baseTX=0, baseTY=0;
-  function onMD(e){
-    if(e.button!==0) return;
-    dragging=true; dragSX=e.clientX; dragSY=e.clientY;
-    baseTX=tx; baseTY=ty;
-    container.classList.add('dragging');
-  }
-  function onMM(e){
-    if(!dragging) return;
-    tx=baseTX+(e.clientX-dragSX);
-    ty=baseTY+(e.clientY-dragSY);
-    clampTx();
-    applyTransform(false);
-  }
-  function onMU(){ dragging=false; container.classList.remove('dragging'); }
-
-  /* ─ TOUCH ─ */
-  let t0=null; // first touch snapshot
-  let baseScale=1, baseRot=0, baseTx2=0, baseTy2=0;
-
-  function getTouchMid(t1,t2){
-    const rect=container.getBoundingClientRect();
-    return {
-      x:(t1.clientX+t2.clientX)/2-rect.left-rect.width/2,
-      y:(t1.clientY+t2.clientY)/2-rect.top-rect.height/2
-    };
-  }
-  function getTouchDist(t1,t2){
-    return Math.hypot(t1.clientX-t2.clientX, t1.clientY-t2.clientY);
-  }
-  function getTouchAngle(t1,t2){
-    return Math.atan2(t2.clientY-t1.clientY, t2.clientX-t1.clientX)*180/Math.PI;
-  }
-
-  function onTS(e){
-    if(e.touches.length===1){
-      t0={
-        type:'pan', sx:e.touches[0].clientX, sy:e.touches[0].clientY,
-        btx:tx, bty:ty
-      };
-    }else if(e.touches.length===2){
-      const [a,b]=[e.touches[0],e.touches[1]];
-      t0={
-        type:'pinch',
-        dist:getTouchDist(a,b),
-        angle:getTouchAngle(a,b),
-        mid:getTouchMid(a,b),
-        bScale:scale, bRot:rot, btx:tx, bty:ty
-      };
-    }
-  }
-  function onTM(e){
-    e.preventDefault();
-    if(!t0) return;
-    if(t0.type==='pan' && e.touches.length===1){
-      tx=t0.btx+(e.touches[0].clientX-t0.sx);
-      ty=t0.bty+(e.touches[0].clientY-t0.sy);
-      clampTx();
-      applyTransform(false);
-    }else if(t0.type==='pinch' && e.touches.length===2){
-      const [a,b]=[e.touches[0],e.touches[1]];
-      const newDist=getTouchDist(a,b);
-      const newAngle=getTouchAngle(a,b);
-      const newMid=getTouchMid(a,b);
-      const newScale=Math.max(MIN,Math.min(MAX, t0.bScale*(newDist/t0.dist)));
-      const dRot=newAngle-t0.angle;
-      // pan to follow midpoint
-      tx=t0.btx+(newMid.x-t0.mid.x);
-      ty=t0.bty+(newMid.y-t0.mid.y);
-      // zoom toward mid
-      tx = newMid.x - (t0.mid.x - t0.btx)*(newScale/t0.bScale);
-      ty = newMid.y - (t0.mid.y - t0.bty)*(newScale/t0.bScale);
-      scale=newScale;
-      rot=t0.bRot+dRot;
-      clampTx();
-      applyTransform(false);
-    }
-  }
-  function onTE(){ t0=null; }
-
-  /* ─ TOOLBAR controls ─ */
-  function ctrl(cmd){
-    switch(cmd){
-      case'zi': scale=Math.min(MAX,scale*1.35); clampTx(); applyTransform(true); break;
-      case'zo': scale=Math.max(MIN,scale/1.35); clampTx(); applyTransform(true); break;
-      case'rl': rot-=90; applyTransform(true); break;
-      case'rr': rot+=90; applyTransform(true); break;
-      case'rs': tx=0;ty=0;rot=0; scale=1; fitImage(); break;
-    }
-  }
-
-  // bind
-  container.addEventListener('wheel',onWheel,{passive:false});
-  container.addEventListener('mousedown',onMD);
-  window.addEventListener('mousemove',onMM);
-  window.addEventListener('mouseup',onMU);
-  container.addEventListener('touchstart',onTS,{passive:true});
-  container.addEventListener('touchmove',onTM,{passive:false});
-  container.addEventListener('touchend',onTE);
-
-  pz={ container, img, ctrl,
-    unbind(){
-      container.removeEventListener('wheel',onWheel);
-      container.removeEventListener('mousedown',onMD);
-      window.removeEventListener('mousemove',onMM);
-      window.removeEventListener('mouseup',onMU);
-      container.removeEventListener('touchstart',onTS);
-      container.removeEventListener('touchmove',onTM);
-      container.removeEventListener('touchend',onTE);
-    }
-  };
-}
-
-function killPanZoom(){
-  if(pz){ pz.unbind(); pz=null; }
-}
-
-function vctrl(cmd){
-  if(pz) pz.ctrl(cmd);
-}
-
-// ═══════════════════════════════════════════════════
-//  FULLSCREEN VIEWER
-// ═══════════════════════════════════════════════════
-let fsPz = null; // pan-zoom state for fullscreen
-
-function openFullscreen(){
-  if(!curProd || !curProd.img2d) return;
-
-  const overlay = document.getElementById('fsOverlay');
-  const img     = document.getElementById('fsImg');
-  const vp      = document.getElementById('fsViewport');
-  const title   = document.getElementById('fsTitle');
-  const hint    = document.getElementById('fsHint');
-
-  title.textContent = curProd.name;
-  img.src = curProd.img2d;
-  img.style.transform = '';
-
-  overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
-
-  // Reset hint animation
-  hint.style.animation = 'none';
-  void hint.offsetWidth; // reflow
-  hint.style.animation = '';
-
-  // Init pan/zoom after a tiny delay so dimensions are ready
-  setTimeout(()=>{
-    killFsPz();
-    fsPz = initPanZoomFS(vp, img);
-  }, 60);
-}
-
-function closeFullscreen(){
-  document.getElementById('fsOverlay').classList.remove('open');
-  killFsPz();
-  // only restore body scroll if modal is not also open
-  if(!document.getElementById('pModal').classList.contains('open')){
-    document.body.style.overflow = '';
-  }
-}
-
-function killFsPz(){
-  if(fsPz){ fsPz.unbind(); fsPz=null; }
-}
-
-function fsctrl(cmd){
-  if(fsPz) fsPz.ctrl(cmd);
-}
-
-// Shared pan/zoom factory — works for both inline and fullscreen viewports
-function initPanZoomFS(container, img){
-  let tx=0, ty=0, scale=1, rot=0;
-  const MIN=0.2, MAX=12;
-  const zoomEl = document.getElementById('fsZoom');
-
-  img.onload = fitImg;
-  if(img.complete && img.naturalWidth) fitImg();
-
-  function fitImg(){
-    const cw=container.clientWidth||screen.width;
-    const ch=container.clientHeight||screen.height;
-    const iw=img.naturalWidth||cw, ih=img.naturalHeight||ch;
-    scale = Math.min(cw/iw, ch/ih, 1);
-    tx=0; ty=0; rot=0;
-    apply(true);
-  }
-
-  function apply(anim){
-    img.style.transition = anim ? 'transform 0.22s cubic-bezier(0.4,0,0.2,1)' : 'none';
-    img.style.transform  = `translate(${tx}px,${ty}px) rotate(${rot}deg) scale(${scale})`;
-    if(zoomEl) zoomEl.textContent = Math.round(scale*100)+'%';
-  }
-
-  function clamp(){
-    const half = Math.max(container.clientWidth, container.clientHeight)*scale*0.6 + 80;
-    tx = Math.max(-half, Math.min(half, tx));
-    ty = Math.max(-half, Math.min(half, ty));
-  }
-
-  // Mouse wheel
-  function onWheel(e){
-    e.preventDefault();
-    const d = e.deltaY < 0 ? 1.14 : 0.88;
-    const ns = Math.max(MIN, Math.min(MAX, scale*d));
-    const r  = container.getBoundingClientRect();
-    const mx = e.clientX - r.left - r.width/2;
-    const my = e.clientY - r.top  - r.height/2;
-    tx = mx - (mx-tx)*(ns/scale);
-    ty = my - (my-ty)*(ns/scale);
-    scale=ns; clamp(); apply(false);
-  }
-
-  // Mouse drag
-  let drag=false, dsx=0, dsy=0, btx=0, bty=0;
-  function onMD(e){
-    if(e.button!==0) return;
-    drag=true; dsx=e.clientX; dsy=e.clientY; btx=tx; bty=ty;
-    container.classList.add('dragging');
-  }
-  function onMM(e){
-    if(!drag) return;
-    tx=btx+(e.clientX-dsx); ty=bty+(e.clientY-dsy);
-    clamp(); apply(false);
-  }
-  function onMU(){ drag=false; container.classList.remove('dragging'); }
-
-  // Touch
-  let t0=null;
-  function getTD(a,b){ return Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY); }
-  function getTA(a,b){ return Math.atan2(b.clientY-a.clientY, b.clientX-a.clientX)*180/Math.PI; }
-  function getTM(a,b){
-    const r=container.getBoundingClientRect();
-    return { x:(a.clientX+b.clientX)/2-r.left-r.width/2,
-             y:(a.clientY+b.clientY)/2-r.top-r.height/2 };
-  }
-  function onTS(e){
-    if(e.touches.length===1){
-      t0={type:'pan',sx:e.touches[0].clientX,sy:e.touches[0].clientY,btx:tx,bty:ty};
-    }else if(e.touches.length===2){
-      const[a,b]=[e.touches[0],e.touches[1]];
-      t0={type:'pinch',dist:getTD(a,b),angle:getTA(a,b),mid:getTM(a,b),
-          bScale:scale,bRot:rot,btx:tx,bty:ty};
-    }
-  }
-  function onTM(e){
-    e.preventDefault();
-    if(!t0) return;
-    if(t0.type==='pan'&&e.touches.length===1){
-      tx=t0.btx+(e.touches[0].clientX-t0.sx);
-      ty=t0.bty+(e.touches[0].clientY-t0.sy);
-      clamp(); apply(false);
-    }else if(t0.type==='pinch'&&e.touches.length===2){
-      const[a,b]=[e.touches[0],e.touches[1]];
-      const nd=getTD(a,b), na=getTA(a,b), nm=getTM(a,b);
-      const ns=Math.max(MIN,Math.min(MAX, t0.bScale*(nd/t0.dist)));
-      tx = nm.x-(t0.mid.x-t0.btx)*(ns/t0.bScale);
-      ty = nm.y-(t0.mid.y-t0.bty)*(ns/t0.bScale);
-      scale=ns; rot=t0.bRot+(na-t0.angle);
-      clamp(); apply(false);
-    }
-  }
-  function onTE(){ t0=null; }
-
-  function ctrl(cmd){
-    switch(cmd){
-      case'zi': scale=Math.min(MAX,scale*1.4); clamp(); apply(true); break;
-      case'zo': scale=Math.max(MIN,scale/1.4); clamp(); apply(true); break;
-      case'rl': rot-=90; apply(true); break;
-      case'rr': rot+=90; apply(true); break;
-      case'rs': tx=0;ty=0;rot=0; fitImg(); break;
-    }
-  }
-
-  container.addEventListener('wheel', onWheel, {passive:false});
-  container.addEventListener('mousedown', onMD);
-  window.addEventListener('mousemove', onMM);
-  window.addEventListener('mouseup', onMU);
-  container.addEventListener('touchstart', onTS, {passive:true});
-  container.addEventListener('touchmove', onTM, {passive:false});
-  container.addEventListener('touchend', onTE);
-
-  return {
-    ctrl,
-    unbind(){
-      container.removeEventListener('wheel', onWheel);
-      container.removeEventListener('mousedown', onMD);
-      window.removeEventListener('mousemove', onMM);
-      window.removeEventListener('mouseup', onMU);
-      container.removeEventListener('touchstart', onTS);
-      container.removeEventListener('touchmove', onTM);
-      container.removeEventListener('touchend', onTE);
-    }
-  };
+  const vp=document.getElementById('imgViewport');
+  const img2d=document.getElementById('m2dImg');
+  const w360=document.getElementById('m360Wrap');
+  const ph=document.getElementById('mPlaceholder');
+  const vt=document.getElementById('vToggle');
+  const b360=document.getElementById('m360Badge');
+  const vc=document.getElementById('viewerControls');
+  const exp=document.getElementById('expandBtn');
+  ph.style.display='none';w360.style.display='none';vp.style.display='none';vc.style.display='none';exp.style.display='none';
+  if(p.img2d){img2d.src=p.img2d;vp.style.display='flex';vc.style.display='flex';exp.style.display='flex';initPanZoom(vp,img2d);}
+  else{ph.style.display='flex';ph.textContent=getSubIcon(p.cat,p.sub);}
+  if(p.img360){vt.style.display='flex';b360.style.display='block';document.getElementById('vt2d').classList.add('active');document.getElementById('vt360').classList.remove('active');}
+  else{vt.style.display='none';b360.style.display='none';}
 }
 
 function setView(v){
-  curView=v;
-  const p=curProd;
-  const vp   = document.getElementById('imgViewport');
-  const img2d= document.getElementById('m2dImg');
-  const w360 = document.getElementById('m360Wrap');
-  const ph   = document.getElementById('mPlaceholder');
-  const vc   = document.getElementById('viewerControls');
+  curView=v;const p=curProd;
+  const vp=document.getElementById('imgViewport'),img2d=document.getElementById('m2dImg');
+  const w360=document.getElementById('m360Wrap'),ph=document.getElementById('mPlaceholder');
+  const vc=document.getElementById('viewerControls');
   document.getElementById('vt2d').classList.toggle('active',v==='2d');
   document.getElementById('vt360').classList.toggle('active',v==='360');
-
   if(v==='2d'){
-    killThree();
-    w360.style.display='none'; ph.style.display='none';
-    if(p.img2d){
-      vp.style.display='flex'; vc.style.display='flex';
-      initPanZoom(vp, img2d);
-    }else{
-      vp.style.display='none'; vc.style.display='none';
-      ph.style.display='flex'; ph.textContent=SUB_ICONS[p.sub]||'💍';
-    }
+    killThree();w360.style.display='none';ph.style.display='none';
+    if(p.img2d){vp.style.display='flex';vc.style.display='flex';initPanZoom(vp,img2d);}
+    else{vp.style.display='none';vc.style.display='none';ph.style.display='flex';ph.textContent=getSubIcon(p.cat,p.sub);}
   }else{
-    killPanZoom();
-    vp.style.display='none'; vc.style.display='none';
-    ph.style.display='none';
-    w360.style.display='block';
-    setTimeout(()=>init360(p.img360),80);
+    killPanZoom();vp.style.display='none';vc.style.display='none';ph.style.display='none';
+    w360.style.display='block';setTimeout(()=>init360(p.img360),80);
   }
 }
 
@@ -1966,510 +1667,397 @@ function closeModal(){
   closeFullscreen();
   document.getElementById('pModal').classList.remove('open');
   document.body.style.overflow='';
-  killThree(); killPanZoom(); curProd=null;
-  const img=document.getElementById('m2dImg');
-  img.style.transform='';
+  killThree();killPanZoom();curProd=null;
+  document.getElementById('m2dImg').style.transform='';
 }
-function handleModalBg(e){ if(e.target===document.getElementById('pModal')) closeModal(); }
+function handleModalBg(e){if(e.target===document.getElementById('pModal'))closeModal();}
 
 function revealSup(){
   const key=document.getElementById('supKey').value;
-  if(!curProd) return;
+  if(!curProd)return;
   if(key===D.settings.supKey){
     const s=curProd.sup||{};
     const has=s.name||s.contact||s.cat||s.pg||s.itm||s.loc||s.notes;
-    const html = has ? `
-      <div class="supplier-info-revealed">
-        ${s.name?`<div class="s-row"><div class="s-label">Supplier</div><div>${esc(s.name)}</div></div>`:''}
-        ${s.loc?`<div class="s-row"><div class="s-label">Location</div><div>${esc(s.loc)}</div></div>`:''}
-        ${s.contact?`<div class="s-row"><div class="s-label">Contact</div><div>${esc(s.contact)}</div></div>`:''}
-        ${s.cat?`<div class="s-row"><div class="s-label">Catalogue No.</div><div>${esc(s.cat)}</div></div>`:''}
-        ${s.pg?`<div class="s-row"><div class="s-label">Page No.</div><div>${esc(s.pg)}</div></div>`:''}
-        ${s.itm?`<div class="s-row"><div class="s-label">Item No.</div><div>${esc(s.itm)}</div></div>`:''}
-        ${s.notes?`<div class="s-row"><div class="s-label">Notes</div><div>${esc(s.notes)}</div></div>`:''}
-      </div>` : `<div class="supplier-info-revealed" style="color:var(--muted)">No supplier info added for this design.</div>`;
+    const html=has?'<div class="supplier-info-revealed">'
+      +(s.name?'<div class="s-row"><div class="s-label">Supplier</div><div>'+esc(s.name)+'</div></div>':'')
+      +(s.loc?'<div class="s-row"><div class="s-label">Location</div><div>'+esc(s.loc)+'</div></div>':'')
+      +(s.contact?'<div class="s-row"><div class="s-label">Contact</div><div>'+esc(s.contact)+'</div></div>':'')
+      +(s.cat?'<div class="s-row"><div class="s-label">Catalogue No.</div><div>'+esc(s.cat)+'</div></div>':'')
+      +(s.pg?'<div class="s-row"><div class="s-label">Page No.</div><div>'+esc(s.pg)+'</div></div>':'')
+      +(s.itm?'<div class="s-row"><div class="s-label">Item No.</div><div>'+esc(s.itm)+'</div></div>':'')
+      +(s.notes?'<div class="s-row"><div class="s-label">Notes</div><div>'+esc(s.notes)+'</div></div>':'')
+      +'</div>':'<div class="supplier-info-revealed" style="color:var(--muted)">No supplier info added for this design.</div>';
     document.getElementById('supDetails').innerHTML=html;
     document.getElementById('supDetails').style.display='block';
-    toast('Supplier info revealed ✓','ok');
-  }else{
-    toast('Incorrect access key','err');
-    document.getElementById('supKey').value='';
-  }
+    toast('Supplier info revealed \u2713','ok');
+  }else{toast('Incorrect access key','err');document.getElementById('supKey').value='';}
 }
 
 function enquireWA(){
   const p=curProd;
   const phone=(D.settings.wa||'').replace(/\D/g,'');
-  const msg=`Hello Sri Lalitha Jewellery! 👋\n\nI'm interested in this design:\n*${p.name}*\n${p.sub} · ${CAT_LABEL[p.cat]}${p.code?`\nCode: ${p.code}`:''}${p.catref?`\nRef: ${p.catref}`:''}\n\nPlease share more details and availability. Thank you!`;
-  window.open(`https://wa.me/${phone||''}?text=${encodeURIComponent(msg)}`,'_blank');
+  const msg='Hello Sri Lalitha Jewellery! \u{1F44B}\n\nI am interested in this design:\n*'+p.name+'*\n'+p.sub+' \u00B7 '+CAT_LABEL[p.cat]+(p.code?'\nCode: '+p.code:'')+(p.catref?'\nRef: '+p.catref:'')+'\n\nPlease share more details and availability. Thank you!';
+  window.open('https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(msg),'_blank');
 }
 
-// ═══════════════════════════════════════════════════
-//  THREE.JS 360° VIEWER
-// ═══════════════════════════════════════════════════
+// === PAN/ZOOM ENGINE ===
+function makePZ(container,img,zoomElId){
+  let tx=0,ty=0,scale=1,rot=0;
+  const MIN=0.2,MAX=12;
+  const zv=zoomElId?document.getElementById(zoomElId):null;
+  img.onload=fit;if(img.complete&&img.naturalWidth)fit();
+  function fit(){const cw=container.clientWidth||400,ch=container.clientHeight||400;const iw=img.naturalWidth||400,ih=img.naturalHeight||400;scale=Math.min(cw/iw,ch/ih,1);tx=0;ty=0;rot=0;apply(true);}
+  function apply(anim){img.style.transition=anim?'transform 0.22s cubic-bezier(0.4,0,0.2,1)':'none';img.style.transform='translate('+tx+'px,'+ty+'px) rotate('+rot+'deg) scale('+scale+')';if(zv)zv.textContent=Math.round(scale*100)+'%';}
+  function clamp(){const h=Math.max(container.clientWidth,container.clientHeight)*scale*0.6+80;tx=Math.max(-h,Math.min(h,tx));ty=Math.max(-h,Math.min(h,ty));}
+  function onWheel(e){e.preventDefault();const d=e.deltaY<0?1.13:0.88;const ns=Math.max(MIN,Math.min(MAX,scale*d));const r=container.getBoundingClientRect();const mx=e.clientX-r.left-r.width/2,my=e.clientY-r.top-r.height/2;tx=mx-(mx-tx)*(ns/scale);ty=my-(my-ty)*(ns/scale);scale=ns;clamp();apply(false);}
+  let drag=false,dsx=0,dsy=0,btx=0,bty=0;
+  function onMD(e){if(e.button!==0)return;drag=true;dsx=e.clientX;dsy=e.clientY;btx=tx;bty=ty;container.classList.add('dragging');}
+  function onMM(e){if(!drag)return;tx=btx+(e.clientX-dsx);ty=bty+(e.clientY-dsy);clamp();apply(false);}
+  function onMU(){drag=false;container.classList.remove('dragging');}
+  let t0=null;
+  function gD(a,b){return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);}
+  function gA(a,b){return Math.atan2(b.clientY-a.clientY,b.clientX-a.clientX)*180/Math.PI;}
+  function gM(a,b){const r=container.getBoundingClientRect();return{x:(a.clientX+b.clientX)/2-r.left-r.width/2,y:(a.clientY+b.clientY)/2-r.top-r.height/2};}
+  function onTS(e){if(e.touches.length===1){t0={type:'pan',sx:e.touches[0].clientX,sy:e.touches[0].clientY,btx:tx,bty:ty};}else if(e.touches.length===2){const[a,b]=[e.touches[0],e.touches[1]];t0={type:'pinch',dist:gD(a,b),angle:gA(a,b),mid:gM(a,b),bScale:scale,bRot:rot,btx:tx,bty:ty};}}
+  function onTM(e){e.preventDefault();if(!t0)return;if(t0.type==='pan'&&e.touches.length===1){tx=t0.btx+(e.touches[0].clientX-t0.sx);ty=t0.bty+(e.touches[0].clientY-t0.sy);clamp();apply(false);}else if(t0.type==='pinch'&&e.touches.length===2){const[a,b]=[e.touches[0],e.touches[1]];const nd=gD(a,b),na=gA(a,b),nm=gM(a,b);const ns=Math.max(MIN,Math.min(MAX,t0.bScale*(nd/t0.dist)));tx=nm.x-(t0.mid.x-t0.btx)*(ns/t0.bScale);ty=nm.y-(t0.mid.y-t0.bty)*(ns/t0.bScale);scale=ns;rot=t0.bRot+(na-t0.angle);clamp();apply(false);}}
+  function onTE(){t0=null;}
+  function ctrl(cmd){switch(cmd){case'zi':scale=Math.min(MAX,scale*1.35);clamp();apply(true);break;case'zo':scale=Math.max(MIN,scale/1.35);clamp();apply(true);break;case'rl':rot-=90;apply(true);break;case'rr':rot+=90;apply(true);break;case'rs':tx=0;ty=0;rot=0;fit();break;}}
+  container.addEventListener('wheel',onWheel,{passive:false});
+  container.addEventListener('mousedown',onMD);
+  window.addEventListener('mousemove',onMM);
+  window.addEventListener('mouseup',onMU);
+  container.addEventListener('touchstart',onTS,{passive:true});
+  container.addEventListener('touchmove',onTM,{passive:false});
+  container.addEventListener('touchend',onTE);
+  return{ctrl,unbind(){container.removeEventListener('wheel',onWheel);container.removeEventListener('mousedown',onMD);window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);container.removeEventListener('touchstart',onTS);container.removeEventListener('touchmove',onTM);container.removeEventListener('touchend',onTE);}};
+}
+function initPanZoom(c,img){killPanZoom();pz=makePZ(c,img,'zoomVal');}
+function killPanZoom(){if(pz){pz.unbind();pz=null;}}
+function vctrl(cmd){if(pz)pz.ctrl(cmd);}
+
+// === FULLSCREEN VIEWER ===
+function openFullscreen(){
+  if(!curProd||!curProd.img2d)return;
+  const img=document.getElementById('fsImg');const vp=document.getElementById('fsViewport');
+  const hint=document.getElementById('fsHint');
+  document.getElementById('fsTitle').textContent=curProd.name;
+  img.src=curProd.img2d;img.style.transform='';
+  document.getElementById('fsOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  hint.style.animation='none';void hint.offsetWidth;hint.style.animation='';
+  setTimeout(()=>{killFsPz();fsPz=makePZ(vp,img,'fsZoom');},60);
+}
+function closeFullscreen(){document.getElementById('fsOverlay').classList.remove('open');killFsPz();if(!document.getElementById('pModal').classList.contains('open'))document.body.style.overflow='';}
+function killFsPz(){if(fsPz){fsPz.unbind();fsPz=null;}}
+function fsctrl(cmd){if(fsPz)fsPz.ctrl(cmd);}
+
+// === THREE.JS 360 ===
 function init360(imgUrl){
-  const cont = document.getElementById('m360Wrap');
-  const canvas= document.getElementById('threeCanvas');
-  const w=cont.clientWidth, h=cont.clientHeight;
-
-  const renderer = new THREE.WebGLRenderer({canvas,antialias:true});
-  renderer.setSize(w,h);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-
-  const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(75,w/h,0.1,100);
+  const cont=document.getElementById('m360Wrap');const canvas=document.getElementById('threeCanvas');
+  const w=cont.clientWidth,h=cont.clientHeight;
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+  renderer.setSize(w,h);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(75,w/h,0.1,100);
   camera.position.set(0,0,0.01);
-
-  const geo=new THREE.SphereGeometry(50,64,32);
-  geo.scale(-1,1,1);
-
+  const geo=new THREE.SphereGeometry(50,64,32);geo.scale(-1,1,1);
   const tex=new THREE.TextureLoader().load(imgUrl);
-  const mat=new THREE.MeshBasicMaterial({map:tex});
-  scene.add(new THREE.Mesh(geo,mat));
-
-  let drag=false, sx=0, sy=0, lon=0, lat=0, tlon=0, tlat=0, auto=true;
+  scene.add(new THREE.Mesh(geo,new THREE.MeshBasicMaterial({map:tex})));
+  let drag=false,sx=0,sy=0,lon=0,lat=0,tlon=0,tlat=0,auto=true;
   const hint=document.getElementById('dragHint');
-
-  function gx(e){return e.clientX||((e.touches||[])[0]||{}).clientX||0}
-  function gy(e){return e.clientY||((e.touches||[])[0]||{}).clientY||0}
-
-  function md(e){ drag=true; sx=gx(e); sy=gy(e); auto=false; if(hint)hint.style.opacity='0'; }
-  function mm(e){
-    if(!drag) return;
-    const nx=gx(e),ny=gy(e);
-    tlon-=(nx-sx)*0.3; tlat+=(ny-sy)*0.12;
-    tlat=Math.max(-85,Math.min(85,tlat));
-    sx=nx; sy=ny;
-  }
-  function mu(){ drag=false; }
-
-  canvas.addEventListener('mousedown',md);
-  canvas.addEventListener('touchstart',md,{passive:true});
-  window.addEventListener('mousemove',mm);
-  window.addEventListener('touchmove',mm,{passive:true});
-  window.addEventListener('mouseup',mu);
-  window.addEventListener('touchend',mu);
-
+  const gx=e=>e.clientX||((e.touches||[])[0]||{}).clientX||0;
+  const gy=e=>e.clientY||((e.touches||[])[0]||{}).clientY||0;
+  const md=e=>{drag=true;sx=gx(e);sy=gy(e);auto=false;if(hint)hint.style.opacity='0';};
+  const mm=e=>{if(!drag)return;const nx=gx(e),ny=gy(e);tlon-=(nx-sx)*0.3;tlat+=(ny-sy)*0.12;tlat=Math.max(-85,Math.min(85,tlat));sx=nx;sy=ny;};
+  const mu=()=>{drag=false;};
+  canvas.addEventListener('mousedown',md);canvas.addEventListener('touchstart',md,{passive:true});
+  window.addEventListener('mousemove',mm);window.addEventListener('touchmove',mm,{passive:true});
+  window.addEventListener('mouseup',mu);window.addEventListener('touchend',mu);
   let aid;
-  function animate(){
+  (function animate(){
     aid=requestAnimationFrame(animate);
-    if(auto) tlon+=0.12;
-    lon+=(tlon-lon)*0.07;
-    lat+=(tlat-lat)*0.07;
-    const phi=THREE.MathUtils.degToRad(90-lat);
-    const theta=THREE.MathUtils.degToRad(lon);
-    camera.lookAt(
-      Math.sin(phi)*Math.cos(theta),
-      Math.cos(phi),
-      Math.sin(phi)*Math.sin(theta)
-    );
+    if(auto)tlon+=0.12;lon+=(tlon-lon)*0.07;lat+=(tlat-lat)*0.07;
+    const phi=THREE.MathUtils.degToRad(90-lat),theta=THREE.MathUtils.degToRad(lon);
+    camera.lookAt(Math.sin(phi)*Math.cos(theta),Math.cos(phi),Math.sin(phi)*Math.sin(theta));
     renderer.render(scene,camera);
-  }
-  animate();
-
-  three={ renderer, aid,
-    listeners:{ mm, mu, md,
-      tmm:mm, tmu:mu, tmd:md }
-  };
+  })();
+  three={renderer,aid,listeners:{mm,mu}};
 }
-
 function killThree(){
-  if(!three) return;
-  cancelAnimationFrame(three.aid);
-  three.renderer.dispose();
-  window.removeEventListener('mousemove',three.listeners.mm);
-  window.removeEventListener('mouseup',three.listeners.mu);
-  window.removeEventListener('touchmove',three.listeners.tmm);
-  window.removeEventListener('touchend',three.listeners.tmu);
+  if(!three)return;cancelAnimationFrame(three.aid);three.renderer.dispose();
+  window.removeEventListener('mousemove',three.listeners.mm);window.removeEventListener('mouseup',three.listeners.mu);
+  window.removeEventListener('touchmove',three.listeners.mm);window.removeEventListener('touchend',three.listeners.mu);
   three=null;
 }
 
-// ═══════════════════════════════════════════════════
-//  ADMIN
-// ═══════════════════════════════════════════════════
+// === ADMIN AUTH ===
 function openAdmin(){
   document.getElementById('adminOv').classList.add('open');
-  if(loggedIn){
-    showAdminPanel();
-  }else{
-    document.getElementById('authWrap').style.display='flex';
-    document.getElementById('adminPanel').style.display='none';
-    setTimeout(()=>document.getElementById('aPassInp').focus(),300);
-  }
+  if(loggedIn){showAdminPanel();}
+  else{document.getElementById('authWrap').style.display='flex';document.getElementById('adminPanel').style.display='none';setTimeout(()=>document.getElementById('aEmailInp').focus(),300);}
 }
-function closeAdmin(){
-  document.getElementById('adminOv').classList.remove('open');
-}
-function doLogin(){
-  const p=document.getElementById('aPassInp').value;
-  if(p===D.settings.adminPass){
-    loggedIn=true;
+function closeAdmin(){document.getElementById('adminOv').classList.remove('open');}
+
+async function doLogin(){
+  const email=document.getElementById('aEmailInp').value.trim();
+  const pass=document.getElementById('aPassInp').value;
+  const btn=document.getElementById('loginBtn');
+  const errEl=document.getElementById('loginErr');
+  errEl.style.display='none';
+  if(!email||!pass){errEl.textContent='Please enter email and password.';errEl.style.display='block';return;}
+  btn.textContent='Logging in\u2026';btn.disabled=true;
+  try{
+    await auth.signInWithEmailAndPassword(email,pass);
     document.getElementById('aPassInp').value='';
     showAdminPanel();
-    loadSettingsForm();
-  }else{
-    toast('Incorrect password','err');
+  }catch(e){
+    errEl.textContent=(['auth/invalid-credential','auth/wrong-password','auth/user-not-found'].includes(e.code))
+      ?'Incorrect email or password.':'Login failed: '+e.message;
+    errEl.style.display='block';
     document.getElementById('aPassInp').value='';
-  }
+  }finally{btn.textContent='Login';btn.disabled=false;}
 }
+
 function showAdminPanel(){
   document.getElementById('authWrap').style.display='none';
   document.getElementById('adminPanel').style.display='flex';
+  const user=auth.currentUser;
+  if(user)document.getElementById('adminEmailLabel').textContent=user.email||'';
   refreshSubSelect();
 }
-function logout(){ loggedIn=false; closeAdmin(); }
 
-function aTab(t){
-  document.querySelectorAll('.atab').forEach((el,i)=>{
-    el.classList.toggle('active',['add','manage','cats','settings'][i]===t);
-  });
-  document.querySelectorAll('.apanel').forEach(el=>el.classList.remove('active'));
-  document.getElementById(`apanel-${t}`).classList.add('active');
-  if(t==='manage')  renderAdminList();
-  if(t==='settings')loadSettingsForm();
-  if(t==='cats')    renderCatPanel();
+async function logout(){await auth.signOut();loggedIn=false;closeAdmin();}
+
+async function sendPwReset(){
+  const user=auth.currentUser;
+  if(!user){toast('Not logged in','err');return;}
+  try{await auth.sendPasswordResetEmail(user.email);toast('Reset email sent to '+user.email,'ok');}
+  catch(e){toast('Failed: '+e.message,'err');}
 }
 
-// ═══════════════════════════════════════════════════
-//  SUBCATEGORY MANAGEMENT
-// ═══════════════════════════════════════════════════
-let addSubFormCat = null; // which cat's form is open
-let selectedIcon  = {};   // per cat, currently picked icon
+// === ADMIN TABS ===
+function aTab(t){
+  document.querySelectorAll('.atab').forEach((el,i)=>el.classList.toggle('active',['add','manage','cats','settings'][i]===t));
+  document.querySelectorAll('.apanel').forEach(el=>el.classList.remove('active'));
+  document.getElementById('apanel-'+t).classList.add('active');
+  if(t==='manage')renderAdminList();
+  if(t==='settings')loadSettingsForm();
+  if(t==='cats')renderCatPanel();
+}
 
+// === SUBCATEGORY MANAGEMENT ===
 function renderCatPanel(){
-  const wrap = document.getElementById('catSections');
-  const cats  = ['gold','silver','panchaloham'];
-  const labels= {gold:'✦ Gold',silver:'◈ Silver',panchaloham:'⬡ Panchaloham'};
-  wrap.innerHTML = cats.map(cat=>{
-    const subs = D.subcats[cat]||[];
-    const defs = DEF_SUBCATS[cat]||[];
-    const chips = subs.map(s=>{
-      const isDef = defs.includes(s);
-      const icon  = getSubIcon(cat,s);
-      const used  = D.products.some(p=>p.cat===cat&&p.sub===s);
-      return `<div class="sub-chip${isDef?' default':''}">
-        <span class="chip-icon">${icon}</span>
-        <span>${esc(s)}</span>
-        ${used?'<span title="Has designs" style="font-size:0.6rem;color:var(--gold);margin-left:2px">●</span>':''}
-        <button class="sub-chip-del" title="${isDef?'Default — cannot delete':'Delete sub-category'}"
-          onclick="delSubcat('${cat}','${s.replace(/'/g,"\\'")}')">✕</button>
-      </div>`;
-    }).join('') || `<div class="no-subs">No sub-categories yet</div>`;
-
-    return `<div class="cat-section">
-      <div class="cat-section-head">
-        <div class="cat-section-title">
-          ${labels[cat]}
-          <span class="cat-badge">${subs.length} sub-categories</span>
-        </div>
-        <button class="btn btn-gold btn-sm" onclick="toggleAddSubForm('${cat}')">+ Add Sub-Category</button>
-      </div>
-      <div class="sub-chips" id="chips-${cat}">${chips}</div>
-      <div class="add-sub-form" id="addform-${cat}">
-        <div style="font-size:0.72rem;color:var(--gold);font-weight:500;margin-bottom:0.5rem">Choose Icon</div>
-        <div class="icon-picker" id="ipicker-${cat}">
-          ${ICON_OPTIONS.map(ic=>`<div class="icon-opt${(selectedIcon[cat]||ICON_OPTIONS[0])===ic?' selected':''}"
-            onclick="pickIcon('${cat}','${ic}')">${ic}</div>`).join('')}
-        </div>
-        <div style="font-size:0.72rem;color:var(--gold);font-weight:500;margin:0.5rem 0 0.35rem">Sub-Category Name</div>
-        <div class="add-sub-row">
-          <input type="text" class="inp" id="subinp-${cat}" placeholder="e.g. Hair Pins, Nose Rings…"
-            style="flex:1"
-            onkeyup="if(event.key==='Enter')addSubcat('${cat}')">
-          <button class="btn btn-gold btn-sm" onclick="addSubcat('${cat}')">Add</button>
-          <button class="btn btn-outline btn-sm" onclick="toggleAddSubForm('${cat}')">Cancel</button>
-        </div>
-      </div>
-    </div>`;
+  const wrap=document.getElementById('catSections');
+  const cats=['gold','silver','panchaloham'];
+  const labels={gold:'\u2736 Gold',silver:'\u25C8 Silver',panchaloham:'\u2B21 Panchaloham'};
+  wrap.innerHTML=cats.map(cat=>{
+    const subs=D.subcats[cat]||[];const defs=DEF_SUBCATS[cat]||[];
+    const chips=subs.map(s=>{
+      const isDef=defs.includes(s);const icon=getSubIcon(cat,s);
+      const used=D.products.some(p=>p.cat===cat&&p.sub===s);
+      return '<div class="sub-chip'+(isDef?' default':'')+'"><span class="chip-icon">'+icon+'</span><span>'+esc(s)+'</span>'
+        +(used?'<span title="Has designs" style="font-size:0.6rem;color:var(--gold);margin-left:2px">\u25CF</span>':'')
+        +'<button class="sub-chip-del" title="'+(isDef?'Default':'Delete')+'" onclick="delSubcat(\''+(cat)+'\',\''+(s.replace(/'/g,"\\'"))+'\')">\u2715</button></div>';
+    }).join('')||'<div class="no-subs">No sub-categories yet</div>';
+    return '<div class="cat-section"><div class="cat-section-head"><div class="cat-section-title">'+labels[cat]
+      +'<span class="cat-badge">'+subs.length+' sub-categories</span></div>'
+      +'<button class="btn btn-gold btn-sm" onclick="toggleAddSubForm(\''+(cat)+'\')">+ Add</button></div>'
+      +'<div class="sub-chips" id="chips-'+cat+'">'+chips+'</div>'
+      +'<div class="add-sub-form" id="addform-'+cat+'">'
+      +'<div style="font-size:0.72rem;color:var(--gold);font-weight:500;margin-bottom:0.5rem">Choose Icon</div>'
+      +'<div class="icon-picker" id="ipicker-'+cat+'">'+ICON_OPTIONS.map(ic=>'<div class="icon-opt'+((selectedIcon[cat]||ICON_OPTIONS[0])===ic?' selected':'')+'" onclick="pickIcon(\''+(cat)+'\',\''+(ic)+'\')">'+ic+'</div>').join('')+'</div>'
+      +'<div style="font-size:0.72rem;color:var(--gold);font-weight:500;margin:0.5rem 0 0.35rem">Sub-Category Name</div>'
+      +'<div class="add-sub-row"><input type="text" class="inp" id="subinp-'+cat+'" placeholder="e.g. Hair Pins\u2026" style="flex:1" onkeyup="if(event.key==='Enter')addSubcat(\''+(cat)+'\')"><button class="btn btn-gold btn-sm" onclick="addSubcat(\''+(cat)+'\')">Add</button><button class="btn btn-outline btn-sm" onclick="toggleAddSubForm(\''+(cat)+'\')">Cancel</button></div>'
+      +'</div></div>';
   }).join('');
 }
 
 function toggleAddSubForm(cat){
-  const form = document.getElementById(`addform-${cat}`);
-  const isOpen = form.classList.contains('open');
-  // close all forms
+  const form=document.getElementById('addform-'+cat);const isOpen=form.classList.contains('open');
   document.querySelectorAll('.add-sub-form').forEach(f=>f.classList.remove('open'));
-  if(!isOpen){
-    form.classList.add('open');
-    addSubFormCat=cat;
-    if(!selectedIcon[cat]) selectedIcon[cat]=ICON_OPTIONS[0];
-    setTimeout(()=>document.getElementById(`subinp-${cat}`)?.focus(),100);
-  }else{
-    addSubFormCat=null;
-  }
+  if(!isOpen){form.classList.add('open');addSubFormCat=cat;if(!selectedIcon[cat])selectedIcon[cat]=ICON_OPTIONS[0];setTimeout(()=>document.getElementById('subinp-'+cat)?.focus(),100);}
+  else{addSubFormCat=null;}
 }
-
-function pickIcon(cat, icon){
+function pickIcon(cat,icon){
   selectedIcon[cat]=icon;
-  document.querySelectorAll(`#ipicker-${cat} .icon-opt`).forEach(el=>{
-    el.classList.toggle('selected', el.textContent===icon);
-  });
+  document.querySelectorAll('#ipicker-'+cat+' .icon-opt').forEach(el=>el.classList.toggle('selected',el.textContent===icon));
 }
-
-function addSubcat(cat){
-  const inp = document.getElementById(`subinp-${cat}`);
-  const name = inp.value.trim();
-  if(!name){ toast('Please enter a sub-category name','err'); return; }
-  if(!D.subcats[cat]) D.subcats[cat]=[];
-  if(D.subcats[cat].includes(name)){ toast('Already exists','err'); return; }
-  D.subcats[cat].push(name);
-  // save icon
-  if(!D.subicons) D.subicons={};
-  D.subicons[cat+':'+name] = selectedIcon[cat]||ICON_OPTIONS[0];
-  save();
-  inp.value='';
-  renderCatPanel();
-  renderSubs();
-  refreshSubSelect();
-  toast(`"${name}" added to ${CAT_LABEL[cat]} ✓`,'ok');
-  // reopen form for this cat
-  setTimeout(()=>toggleAddSubForm(cat),50);
+async function addSubcat(cat){
+  const inp=document.getElementById('subinp-'+cat);const name=inp.value.trim();
+  if(!name){toast('Please enter a name','err');return;}
+  if(!D.subcats[cat])D.subcats[cat]=[];
+  if(D.subcats[cat].includes(name)){toast('Already exists','err');return;}
+  D.subcats[cat].push(name);if(!D.subicons)D.subicons={};D.subicons[cat+':'+name]=selectedIcon[cat]||ICON_OPTIONS[0];
+  await saveSettingsToFS();inp.value='';renderCatPanel();renderSubs();refreshSubSelect();
+  toast('"'+name+'" added \u2713','ok');setTimeout(()=>toggleAddSubForm(cat),50);
 }
-
-function delSubcat(cat, name){
-  const isDef = (DEF_SUBCATS[cat]||[]).includes(name);
-  if(isDef){ toast('Default sub-categories cannot be deleted','err'); return; }
-  const inUse = D.products.some(p=>p.cat===cat&&p.sub===name);
-  if(inUse){
-    if(!confirm(`"${name}" has designs assigned to it. Deleting this sub-category will not delete those designs, but they will no longer appear in the filter. Continue?`)) return;
-  }else{
-    if(!confirm(`Delete sub-category "${name}" from ${CAT_LABEL[cat]}?`)) return;
-  }
-  D.subcats[cat] = D.subcats[cat].filter(s=>s!==name);
-  if(D.subicons) delete D.subicons[cat+':'+name];
-  save();
-  renderCatPanel();
-  renderSubs();
-  refreshSubSelect();
-  toast(`"${name}" removed`,'ok');
+async function delSubcat(cat,name){
+  if((DEF_SUBCATS[cat]||[]).includes(name)){toast('Default sub-categories cannot be deleted','err');return;}
+  const inUse=D.products.some(p=>p.cat===cat&&p.sub===name);
+  if(inUse){if(!confirm('"'+name+'" has designs assigned. Deleting won't remove those designs but they will be hidden from the filter. Continue?'))return;}
+  else{if(!confirm('Delete "'+name+'" from '+CAT_LABEL[cat]+'?'))return;}
+  D.subcats[cat]=D.subcats[cat].filter(s=>s!==name);if(D.subicons)delete D.subicons[cat+':'+name];
+  await saveSettingsToFS();renderCatPanel();renderSubs();refreshSubSelect();toast('"'+name+'" removed','ok');
 }
-
-// Rebuild the fsub <select> based on selected category in the add-design form
 function refreshSubSelect(keepVal){
-  const cat = document.getElementById('fcat')?.value || 'gold';
-  const sel = document.getElementById('fsub');
-  if(!sel) return;
-  const prev = keepVal || sel.value;
-  const subs = D.subcats[cat] || DEF_SUBCATS[cat] || [];
-  sel.innerHTML = subs.map(s=>`<option${s===prev?' selected':''}>${esc(s)}</option>`).join('');
+  const cat=document.getElementById('fcat')?.value||'gold';const sel=document.getElementById('fsub');if(!sel)return;
+  const prev=keepVal||sel.value;const subs=D.subcats[cat]||DEF_SUBCATS[cat]||[];
+  sel.innerHTML=subs.map(s=>'<option'+(s===prev?' selected':'')+'>'+esc(s)+'</option>').join('');
 }
 
-// ═══════════════════════════════════════════════════
-//  PRODUCT CRUD
-// ═══════════════════════════════════════════════════
-function handleImg(input, prevId, placeholderId){
-  const file=input.files[0]; if(!file) return;
-  if(file.size>3*1024*1024) toast('Image is large (>3MB). Consider compressing.','err');
+// === PRODUCT CRUD (FIREBASE) ===
+function handleImg(input,prevId,placeholderId){
+  const file=input.files[0];if(!file)return;
   const r=new FileReader();
-  r.onload=e=>{
-    const prev=document.getElementById(prevId);
-    const ph=document.getElementById(placeholderId);
-    prev.src=e.target.result;
-    prev.style.display='block';
-    if(ph) ph.style.display='none';
-  };
+  r.onload=e=>{const prev=document.getElementById(prevId);const ph=document.getElementById(placeholderId);prev.src=e.target.result;prev.style.display='block';if(ph)ph.style.display='none';};
   r.readAsDataURL(file);
 }
 
-function saveProduct(){
+async function uploadImage(file,path,progId,barId){
+  const prog=document.getElementById(progId);const bar=document.getElementById(barId);
+  if(prog)prog.classList.add('active');
+  return new Promise((resolve,reject)=>{
+    const task=storage.ref(path).put(file);
+    task.on('state_changed',
+      snap=>{const pct=(snap.bytesTransferred/snap.totalBytes)*100;if(bar)bar.style.width=pct+'%';},
+      err=>{if(prog)prog.classList.remove('active');reject(err);},
+      async()=>{if(prog){prog.classList.remove('active');if(bar)bar.style.width='0%';}resolve(await task.snapshot.ref.getDownloadURL());}
+    );
+  });
+}
+
+async function saveProduct(){
   const name=document.getElementById('fn').value.trim();
-  if(!name){ toast('Please enter a design name','err'); return; }
+  if(!name){toast('Please enter a design name','err');return;}
+  const btn=document.getElementById('saveBtn');const status=document.getElementById('saveStatus');
+  btn.disabled=true;btn.textContent='\u23F3 Saving\u2026';
+  try{
+    const docId=editId||db.collection('products').doc().id;
+    let img2dUrl=editImg2d,img360Url=editImg360;
+    const file2d=document.getElementById('f2d').files[0];
+    const file360=document.getElementById('f360').files[0];
+    if(file2d){status.textContent='\u{1F4E4} Uploading photo\u2026';img2dUrl=await uploadImage(file2d,'images/'+docId+'/2d_'+Date.now(),'prog2d','progBar2d');}
+    if(file360){status.textContent='\u{1F4E4} Uploading 360\u00B0\u2026';img360Url=await uploadImage(file360,'images/'+docId+'/360_'+Date.now(),'prog360','progBar360');}
+    status.textContent='\u{1F4BE} Saving to Firebase\u2026';
+    const prod={
+      name,cat:document.getElementById('fcat').value,sub:document.getElementById('fsub').value,
+      code:document.getElementById('fcode').value.trim(),wt:document.getElementById('fwt').value.trim(),
+      pur:document.getElementById('fpur').value.trim(),mk:document.getElementById('fmk').value.trim(),
+      stone:document.getElementById('fst').value.trim(),catref:document.getElementById('fcref').value.trim(),
+      notes:document.getElementById('fnotes').value.trim(),img2d:img2dUrl,img360:img360Url,
+      sup:{name:document.getElementById('ssup').value.trim(),cat:document.getElementById('scat').value.trim(),
+        pg:document.getElementById('spg').value.trim(),itm:document.getElementById('sitm').value.trim(),
+        contact:document.getElementById('scon').value.trim(),loc:document.getElementById('sloc').value.trim(),
+        notes:document.getElementById('snotes').value.trim()},
+      ts:firebase.firestore.FieldValue.serverTimestamp()
+    };
+    await db.collection('products').doc(docId).set(prod);
+    clearForm();toast('Design saved to Firebase \u2728','ok');
+  }catch(e){console.error(e);toast('Error: '+e.message,'err');}
+  finally{btn.disabled=false;btn.textContent='\u{1F4BE} Save Design';status.textContent='';}
+}
 
-  const get2d=()=>{ const i=document.getElementById('p2d'); return i.style.display!='none'?i.src:''; };
-  const get360=()=>{ const i=document.getElementById('p360'); return i.style.display!='none'?i.src:''; };
-
-  const prod={
-    id: editId || D.nid++,
-    name,
-    cat: document.getElementById('fcat').value,
-    sub: document.getElementById('fsub').value,
-    code: document.getElementById('fcode').value.trim(),
-    wt: document.getElementById('fwt').value.trim(),
-    pur: document.getElementById('fpur').value.trim(),
-    mk: document.getElementById('fmk').value.trim(),
-    stone: document.getElementById('fst').value.trim(),
-    catref: document.getElementById('fcref').value.trim(),
-    notes: document.getElementById('fnotes').value.trim(),
-    img2d: get2d(),
-    img360: get360(),
-    sup:{
-      name:  document.getElementById('ssup').value.trim(),
-      cat:   document.getElementById('scat').value.trim(),
-      pg:    document.getElementById('spg').value.trim(),
-      itm:   document.getElementById('sitm').value.trim(),
-      contact:document.getElementById('scon').value.trim(),
-      loc:   document.getElementById('sloc').value.trim(),
-      notes: document.getElementById('snotes').value.trim(),
-    },
-    ts: editId ? (D.products.find(p=>p.id===editId)||{}).ts||new Date().toISOString() : new Date().toISOString()
-  };
-
-  if(editId){
-    const idx=D.products.findIndex(p=>p.id===editId);
-    if(idx!==-1) D.products[idx]=prod;
-    editId=null;
-    document.getElementById('saveBtn').textContent='💾 Save Design';
-    document.getElementById('addPanelTitle').textContent='Add New Design';
-  }else{
-    D.products.push(prod);
-  }
-  save();
-  renderSubs(); renderProducts();
-  clearForm();
-  toast('Design saved successfully ✨','ok');
+async function delProd(id){
+  if(!confirm('Delete this design permanently from Firebase?'))return;
+  try{
+    const prod=D.products.find(p=>p.id===id);
+    await db.collection('products').doc(id).delete();
+    if(prod?.img2d)try{await storage.refFromURL(prod.img2d).delete();}catch(e){}
+    if(prod?.img360)try{await storage.refFromURL(prod.img360).delete();}catch(e){}
+    toast('Design deleted','ok');renderAdminList();
+  }catch(e){toast('Error: '+e.message,'err');}
 }
 
 function editProd(id){
-  editId=id;
-  const p=D.products.find(p=>p.id===id);
-  if(!p) return;
+  editId=id;const p=D.products.find(p=>p.id===id);if(!p)return;
   aTab('add');
   document.getElementById('addPanelTitle').textContent='Edit Design';
-  document.getElementById('saveBtn').textContent='✏️ Update Design';
+  document.getElementById('saveBtn').textContent='\u270F\uFE0F Update Design';
   document.getElementById('fn').value=p.name||'';
   document.getElementById('fcat').value=p.cat||'gold';
-  refreshSubSelect(p.sub||'Rings');  // populate correct subs first
-  document.getElementById('fcode').value=p.code||'';
-  document.getElementById('fwt').value=p.wt||'';
-  document.getElementById('fpur').value=p.pur||'';
-  document.getElementById('fmk').value=p.mk||'';
-  document.getElementById('fst').value=p.stone||'';
-  document.getElementById('fcref').value=p.catref||'';
+  refreshSubSelect(p.sub||'Rings');
+  document.getElementById('fcode').value=p.code||'';document.getElementById('fwt').value=p.wt||'';
+  document.getElementById('fpur').value=p.pur||'';document.getElementById('fmk').value=p.mk||'';
+  document.getElementById('fst').value=p.stone||'';document.getElementById('fcref').value=p.catref||'';
   document.getElementById('fnotes').value=p.notes||'';
-
-  function loadPrev(imgData,prevId,phId){
-    const img=document.getElementById(prevId);
-    const ph=document.getElementById(phId);
-    if(imgData){ img.src=imgData; img.style.display='block'; if(ph)ph.style.display='none'; }
-    else{ img.style.display='none'; img.src=''; if(ph)ph.style.display='block'; }
-  }
-  loadPrev(p.img2d,'p2d','p2dp');
-  loadPrev(p.img360,'p360','p360p');
-
+  editImg2d=p.img2d||'';editImg360=p.img360||'';
+  function lp(url,prevId,phId){const img=document.getElementById(prevId);const ph=document.getElementById(phId);if(url){img.src=url;img.style.display='block';if(ph)ph.style.display='none';}else{img.style.display='none';img.src='';if(ph)ph.style.display='block';}}
+  lp(p.img2d,'p2d','p2dp');lp(p.img360,'p360','p360p');
   const s=p.sup||{};
-  document.getElementById('ssup').value=s.name||'';
-  document.getElementById('scat').value=s.cat||'';
-  document.getElementById('spg').value=s.pg||'';
-  document.getElementById('sitm').value=s.itm||'';
-  document.getElementById('scon').value=s.contact||'';
-  document.getElementById('sloc').value=s.loc||'';
+  document.getElementById('ssup').value=s.name||'';document.getElementById('scat').value=s.cat||'';
+  document.getElementById('spg').value=s.pg||'';document.getElementById('sitm').value=s.itm||'';
+  document.getElementById('scon').value=s.contact||'';document.getElementById('sloc').value=s.loc||'';
   document.getElementById('snotes').value=s.notes||'';
-
   document.querySelector('.admin-body').scrollTop=0;
 }
 
-function delProd(id){
-  if(!confirm('Delete this design permanently?')) return;
-  D.products=D.products.filter(p=>p.id!==id);
-  save(); renderSubs(); renderProducts(); renderAdminList();
-  toast('Design deleted','ok');
-}
-
 function clearForm(){
-  editId=null;
+  editId=null;editImg2d='';editImg360='';
   document.getElementById('addPanelTitle').textContent='Add New Design';
-  document.getElementById('saveBtn').textContent='💾 Save Design';
-  ['fn','fcode','fwt','fpur','fmk','fst','fcref','fnotes','ssup','scat','spg','sitm','scon','sloc','snotes'].forEach(id=>{
-    document.getElementById(id).value='';
-  });
-  document.getElementById('fcat').value='gold';
-  refreshSubSelect();
-  ['p2d','p360'].forEach(id=>{
-    const img=document.getElementById(id); img.style.display='none'; img.src='';
-  });
-  document.getElementById('p2dp').style.display='block';
-  document.getElementById('p360p').style.display='block';
+  document.getElementById('saveBtn').textContent='\u{1F4BE} Save Design';
+  ['fn','fcode','fwt','fpur','fmk','fst','fcref','fnotes','ssup','scat','spg','sitm','scon','sloc','snotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fcat').value='gold';refreshSubSelect();
+  document.getElementById('f2d').value='';document.getElementById('f360').value='';
+  ['p2d','p360'].forEach(id=>{const img=document.getElementById(id);img.style.display='none';img.src='';});
+  document.getElementById('p2dp').style.display='block';document.getElementById('p360p').style.display='block';
 }
 
 function renderAdminList(){
   const filter=document.getElementById('mgrFilter').value;
-  const list=document.getElementById('apList');
-  const emp=document.getElementById('apEmpty');
-  let ps=D.products;
-  if(filter) ps=ps.filter(p=>p.cat===filter);
-  if(!ps.length){ list.innerHTML=''; emp.style.display='block'; return; }
+  const list=document.getElementById('apList');const emp=document.getElementById('apEmpty');
+  let ps=D.products;if(filter)ps=ps.filter(p=>p.cat===filter);
+  if(!ps.length){list.innerHTML='';emp.style.display='block';return;}
   emp.style.display='none';
-  list.innerHTML=ps.map(p=>`
-    <div class="ap-card">
-      ${p.img2d?`<img src="${p.img2d}" alt="${esc(p.name)}">`:`<div class="ap-no-img">${SUB_ICONS[p.sub]||'💍'}</div>`}
-      <div class="ap-info">
-        <div class="ap-name" title="${esc(p.name)}">${esc(p.name)}</div>
-        <div class="ap-meta">${CAT_LABEL[p.cat]} · ${p.sub}${p.code?` · ${p.code}`:''}</div>
-        <div class="ap-acts">
-          <button class="btn btn-outline btn-sm" onclick="editProd(${p.id})">Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="delProd(${p.id})">Del</button>
-        </div>
-      </div>
-    </div>`).join('');
+  list.innerHTML=ps.map(p=>'<div class="ap-card">'
+    +(p.img2d?'<img src="'+p.img2d+'" alt="'+esc(p.name)+'">'
+    :'<div class="ap-no-img">'+getSubIcon(p.cat,p.sub)+'</div>')
+    +'<div class="ap-info"><div class="ap-name" title="'+esc(p.name)+'">'+esc(p.name)+'</div>'
+    +'<div class="ap-meta">'+CAT_LABEL[p.cat]+' \u00B7 '+(p.sub||'')+(p.code?' \u00B7 '+p.code:'')+'</div>'
+    +'<div class="ap-acts"><button class="btn btn-outline btn-sm" onclick="editProd(\''+(p.id)+'\')">Edit</button>'
+    +'<button class="btn btn-danger btn-sm" onclick="delProd(\''+(p.id)+'\')">Del</button></div>'
+    +'</div></div>').join('');
 }
 
-// ═══════════════════════════════════════════════════
-//  SETTINGS
-// ═══════════════════════════════════════════════════
+// === SETTINGS ===
 function loadSettingsForm(){
-  const s=D.settings;
-  document.getElementById('sAP').value='';
   document.getElementById('sSK').value='';
-  document.getElementById('sWA').value=s.wa||'';
-  document.getElementById('sAdr').value=s.address||'';
+  document.getElementById('sWA').value=D.settings.wa||'';
+  document.getElementById('sAdr').value=D.settings.address||'';
 }
-function saveSettings(){
-  const nap=document.getElementById('sAP').value;
+async function saveSettings(){
   const nsk=document.getElementById('sSK').value;
-  if(nap) D.settings.adminPass=nap;
-  if(nsk) D.settings.supKey=nsk;
+  if(nsk)D.settings.supKey=nsk;
   D.settings.wa=document.getElementById('sWA').value;
   D.settings.address=document.getElementById('sAdr').value;
-  save(); toast('Settings saved ✓','ok');
+  try{await saveSettingsToFS();toast('Settings saved \u2713','ok');}
+  catch(e){toast('Error: '+e.message,'err');}
 }
-function nukeAll(){
-  if(!confirm('Delete ALL designs? This cannot be undone.')) return;
-  if(!confirm('Are you absolutely sure?')) return;
-  D.products=[]; D.nid=1; save();
-  renderSubs(); renderProducts(); renderAdminList();
-  toast('All data cleared','ok');
+async function nukeAll(){
+  if(!confirm('Delete ALL designs permanently from Firebase? Cannot be undone.'))return;
+  if(!confirm('FINAL WARNING: This will delete all designs and images permanently. Are you sure?'))return;
+  try{
+    const snap=await db.collection('products').get();
+    const batch=db.batch();snap.docs.forEach(doc=>batch.delete(doc.ref));
+    await batch.commit();toast('All data cleared','ok');
+  }catch(e){toast('Error: '+e.message,'err');}
 }
 
-// ═══════════════════════════════════════════════════
-//  UTILITIES
-// ═══════════════════════════════════════════════════
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+// === UTILITIES ===
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toast(msg,type=''){
-  const el=document.getElementById('toast');
-  el.textContent=msg; el.className=`toast ${type} show`;
-  clearTimeout(el._t); el._t=setTimeout(()=>el.className=`toast ${type}`,3000);
+  const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+type+' show';
+  clearTimeout(el._t);el._t=setTimeout(()=>el.className='toast '+type,3200);
 }
-function scrollTop(){window.scrollTo({top:0,behavior:'smooth'})}
 
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
-    if(document.getElementById('fsOverlay').classList.contains('open')){ closeFullscreen(); return; }
-    if(document.getElementById('pModal').classList.contains('open')) closeModal();
-    if(document.getElementById('adminOv').classList.contains('open') && !loggedIn) closeAdmin();
+    if(document.getElementById('fsOverlay').classList.contains('open')){closeFullscreen();return;}
+    if(document.getElementById('pModal').classList.contains('open'))closeModal();
+    if(document.getElementById('adminOv').classList.contains('open')&&!loggedIn)closeAdmin();
   }
 });
 
-// ═══════════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════════
-load();
-
-// Seed with demo data if empty
-if(D.products.length===0){
-  const demo=[
-    {id:D.nid++,name:'Antique Lotus Ring',cat:'gold',sub:'Rings',code:'GR-001',wt:'4.2g',pur:'22K',mk:'12%',stone:'None',catref:'Catalogue 1, Page 3',notes:'Traditional lotus design, perfect for daily wear',img2d:'',img360:'',sup:{name:'Bharath Jewels',cat:'BJC-2024-01',pg:'3',itm:'Item 1',contact:'+91 98765 43210',loc:'Chennai',notes:'Min order 5 pcs'},ts:new Date().toISOString()},
-    {id:D.nid++,name:'Temple Necklace Set',cat:'gold',sub:'Necklaces',code:'GN-012',wt:'28.5g',pur:'22K',mk:'15%',stone:'Ruby, Emerald',catref:'Catalogue 2, Page 7',notes:'Handcrafted antique finish temple necklace',img2d:'',img360:'',sup:{name:'Dharani Crafts',cat:'DCH-08',pg:'7',itm:'Item 3',contact:'+91 87654 32109',loc:'Hyderabad',notes:''},ts:new Date(Date.now()-10*24*3600*1000).toISOString()},
-    {id:D.nid++,name:'Jhumka Earrings',cat:'gold',sub:'Earrings',code:'GE-045',wt:'8.1g',pur:'22K',mk:'18%',stone:'CZ',catref:'Catalogue 1, Page 11',notes:'Classic jhumka design with CZ stones',img2d:'',img360:'',sup:{name:'Bharath Jewels',cat:'BJC-2024-01',pg:'11',itm:'Item 5',contact:'+91 98765 43210',loc:'Chennai',notes:''},ts:new Date(Date.now()-15*24*3600*1000).toISOString()},
-    {id:D.nid++,name:'Filigree Bracelet',cat:'silver',sub:'Bracelets',code:'SB-007',wt:'12.8g',pur:'92.5%',mk:'18%',stone:'None',catref:'Catalogue 4, Page 15',notes:'Delicate filigree work, ideal for gifting',img2d:'',img360:'',sup:{name:'Rajkot Silver Co.',cat:'RSC-12',pg:'15',itm:'Item 2',contact:'+91 76543 21098',loc:'Rajkot',notes:''},ts:new Date(Date.now()-20*24*3600*1000).toISOString()},
-    {id:D.nid++,name:'Oxidised Anklets',cat:'silver',sub:'Anklets',code:'SA-019',wt:'22g',pur:'92.5%',mk:'14%',stone:'None',catref:'Catalogue 4, Page 22',notes:'Pair of oxidised silver anklets with ghungroo',img2d:'',img360:'',sup:{name:'Rajkot Silver Co.',cat:'RSC-12',pg:'22',itm:'Item 4',contact:'+91 76543 21098',loc:'Rajkot',notes:'Price includes pair'},ts:new Date(Date.now()-25*24*3600*1000).toISOString()},
-    {id:D.nid++,name:'Panchaloham Bangles Set',cat:'panchaloham',sub:'Bangles',code:'PB-003',wt:'85g',pur:'5 Metal Alloy',mk:'8%',stone:'None',catref:'Catalogue 6, Page 2',notes:'Set of 4 bangles — traditional panchaloham composition',img2d:'',img360:'',sup:{name:'Coimbatore Metals',cat:'CMF-06',pg:'2',itm:'Item 1',contact:'+91 65432 10987',loc:'Coimbatore',notes:'Set of 4'},ts:new Date(Date.now()-30*24*3600*1000).toISOString()},
-    {id:D.nid++,name:'Panchaloham Rings Set',cat:'panchaloham',sub:'Rings',code:'PR-008',wt:'12g',pur:'5 Metal Alloy',mk:'6%',stone:'None',catref:'Catalogue 6, Page 5',notes:'Set of 9 rings for all fingers',img2d:'',img360:'',sup:{name:'Coimbatore Metals',cat:'CMF-06',pg:'5',itm:'Item 2',contact:'+91 65432 10987',loc:'Coimbatore',notes:'Navagraha set'},ts:new Date(Date.now()-35*24*3600*1000).toISOString()},
-  ];
-  D.products=demo; save();
-}
-
-renderSubs();
-renderProducts();
-</script>
+// === START ===
+initApp();
+<\/script>
 </body>
 </html>
