@@ -1553,7 +1553,7 @@ function renderSubs() {
   const subs = D.subcats[curCat]||[]; const seen=new Set(); const list=['All'];
   subs.forEach(s=>{ if(!seen.has(s)){seen.add(s);list.push(s);} });
   document.getElementById('subBar').innerHTML = list.map(s =>
-    '<button class="sub-btn'+(s===curSub?' active':'')+'" onclick="pickSub('+JSON.stringify(s)+')">'
+    '<button class="sub-btn'+(s===curSub?' active':'')+'" onclick=\'pickSub('+JSON.stringify(s)+')\'>'
     +(s!=='All'?getSubIcon(curCat,s)+' ':'')+esc(s)+'</button>'
   ).join('');
 }
@@ -1579,7 +1579,7 @@ function cardHTML(p,idx) {
   const img=p.img2d
     ?'<img src="'+p.img2d+'" alt="'+esc(p.name)+'" loading="lazy">'
     :'<div class="p-card-placeholder">'+getSubIcon(p.cat,p.sub)+'</div>';
-  return '<div class="p-card fade-up" onclick="openProd('+JSON.stringify(p.id)+')" style="animation-delay:'+(idx*0.05)+'s">'
+  return '<div class="p-card fade-up" onclick=\'openProd('+JSON.stringify(p.id)+')\' style="animation-delay:'+(idx*0.05)+'s">'
     +'<div class="p-card-img-wrap">'+img
     +(p.img360?'<div class="badge badge-360">360°</div>':'')
     +(isNew?'<div class="badge badge-new">New</div>':'')
@@ -1816,15 +1816,15 @@ function renderCatPanel() {
     const subs=D.subcats[cat]||[],defs=DEF_SUBCATS[cat]||[];
     const chips=subs.map(s=>{
       const isDef=defs.includes(s),used=D.products.some(p=>p.cat===cat&&p.sub===s);
-      return '<div class="sub-chip'+(isDef?' default':'')+'"><span class="chip-icon">'+getSubIcon(cat,s)+'</span><span>'+esc(s)+'</span>'+(used?'<span style="font-size:0.6rem;color:var(--gold);margin-left:2px">●</span>':'')+'<button class="sub-chip-del" onclick="delSubcat('+JSON.stringify(cat)+','+JSON.stringify(s)+')">✕</button></div>';
+      return '<div class="sub-chip'+(isDef?' default':'')+'"><span class="chip-icon">'+getSubIcon(cat,s)+'</span><span>'+esc(s)+'</span>'+(used?'<span style="font-size:0.6rem;color:var(--gold);margin-left:2px">●</span>':'')+'<button class="sub-chip-del" onclick=\'delSubcat('+JSON.stringify(cat)+','+JSON.stringify(s)+')\'>✕</button>'</div>';
     }).join('')||'<div class="no-subs">No sub-categories yet</div>';
     const iconPicker=ICON_OPTIONS.map(ic=>'<div class="icon-opt'+((selectedIcon[cat]||ICON_OPTIONS[0])===ic?' selected':'')+'" onclick="pickIcon('+JSON.stringify(cat)+','+JSON.stringify(ic)+')">'+ic+'</div>').join('');
-    return '<div class="cat-section"><div class="cat-section-head"><div class="cat-section-title">'+labels[cat]+'<span class="cat-badge">'+subs.length+' sub-categories</span></div><button class="btn btn-gold btn-sm" onclick="toggleAddSubForm('+JSON.stringify(cat)+')">+ Add</button></div>'
+    return '<div class="cat-section"><div class="cat-section-head"><div class="cat-section-title">'+labels[cat]+'<span class="cat-badge">'+subs.length+' sub-categories</span></div><button class="btn btn-gold btn-sm" onclick=\'toggleAddSubForm('+JSON.stringify(cat)+')\'">+ Add</button></div>'
       +'<div class="sub-chips">'+chips+'</div>'
       +'<div class="add-sub-form" id="addform-'+cat+'"><div style="font-size:0.72rem;color:var(--gold);font-weight:500;margin-bottom:0.5rem">Choose Icon</div>'
       +'<div class="icon-picker" id="ipicker-'+cat+'">'+iconPicker+'</div>'
       +'<div style="font-size:0.72rem;color:var(--gold);font-weight:500;margin:0.5rem 0 0.35rem">Name</div>'
-      +'<div class="add-sub-row"><input type="text" class="inp" id="subinp-'+cat+'" placeholder="e.g. Hair Pins" style="flex:1"><button class="btn btn-gold btn-sm" onclick="addSubcat('+JSON.stringify(cat)+')">Add</button><button class="btn btn-outline btn-sm" onclick="toggleAddSubForm('+JSON.stringify(cat)+')">Cancel</button></div></div></div>';
+      +'<div class="add-sub-row"><input type="text" class="inp" id="subinp-'+cat+'" placeholder="e.g. Hair Pins" style="flex:1"><button class="btn btn-gold btn-sm" ... onclick=\'addSubcat('+JSON.stringify(cat)+')\'>Add</button><button class="btn btn-outline btn-sm" onclick=\'toggleAddSubForm('+JSON.stringify(cat)+')\'>Cancel</button></div></div></div>';
   }).join('');
   ['gold','silver','panchaloham'].forEach(cat=>{const inp=document.getElementById('subinp-'+cat);if(inp)inp.addEventListener('keyup',e=>{if(e.key==='Enter')addSubcat(cat);});});
 }
@@ -1926,7 +1926,7 @@ function renderAdminList(){
   const ps=filter?D.products.filter(p=>p.cat===filter):D.products;
   if(!ps.length){list.innerHTML='';emp.style.display='block';return;}
   emp.style.display='none';
-  list.innerHTML=ps.map(p=>'<div class="ap-card">'+(p.img2d?'<img src="'+p.img2d+'" alt="'+esc(p.name)+'">':'<div class="ap-no-img">'+getSubIcon(p.cat,p.sub)+'</div>')+'<div class="ap-info"><div class="ap-name" title="'+esc(p.name)+'">'+esc(p.name)+'</div><div class="ap-meta">'+CAT_LABEL[p.cat]+' · '+(p.sub||'')+(p.code?' · '+p.code:'')+'</div><div class="ap-acts"><button class="btn btn-outline btn-sm" onclick="editProd('+JSON.stringify(p.id)+')">Edit</button><button class="btn btn-danger btn-sm" onclick="delProd('+JSON.stringify(p.id)+')">Del</button></div></div></div>').join('');
+  list.innerHTML=ps.map(p=>'<div class="ap-card">'+(p.img2d?'<img src="'+p.img2d+'" alt="'+esc(p.name)+'">':'<div class="ap-no-img">'+getSubIcon(p.cat,p.sub)+'</div>')+'<div class="ap-info"><div class="ap-name" title="'+esc(p.name)+'">'+esc(p.name)+'</div><div class="ap-meta">'+CAT_LABEL[p.cat]+' · '+(p.sub||'')+(p.code?' · '+p.code:'')+'</div><div class="ap-acts"><button class="btn btn-outline btn-sm" onclick=\'editProd('+JSON.stringify(p.id)+')\'>Edit</button><button class="btn btn-danger btn-sm" onclick=\'delProd('+JSON.stringify(p.id)+')\'>Del</button></div></div></div>').join('');
 }
 
 // ── SETTINGS ──────────────────────────────────────
