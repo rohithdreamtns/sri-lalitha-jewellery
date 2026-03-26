@@ -1168,12 +1168,12 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
         <div class="sec-title-a" id="addPanelTitle">Add New Design</div>
         <div class="fgrid">
           <div class="fg">
-            <label class="fl">Design Name *</label>
+            <label class="fl">Design Name <span style="color:var(--muted);font-size:0.75rem">(Optional)</span></label>
             <input type="text" class="inp inp-full" id="fn" placeholder="e.g. Lotus Ring Design">
           </div>
           <div class="fg">
-            <label class="fl">Design Code</label>
-            <input type="text" class="inp inp-full" id="fcode" placeholder="e.g. GR-001">
+            <label class="fl">Design Code *</label>
+            <input type="text" class="inp inp-full" id="fcode" placeholder="Auto-generated">
           </div>
           <div class="fg">
             <label class="fl">Category *</label>
@@ -1583,7 +1583,7 @@ function cardHTML(p,idx) {
     +'<div class="p-card-img-wrap">'+img
     +(p.img360?'<div class="badge badge-360">360°</div>':'')
     +(isNew?'<div class="badge badge-new">New</div>':'')
-    +'</div><div class="p-card-body"><div class="p-card-name">'+esc(p.name)+'</div>'
+    +'</div><div class="p-card-body"><div class="p-card-name">'+esc(p.name||p.code||'')+'</div>'
     +'<div class="p-card-tags">'
     +(p.wt?'<span class="tag">'+esc(p.wt)+'</span>':'')
     +(p.pur?'<span class="tag">'+esc(p.pur)+'</span>':'')
@@ -1597,7 +1597,7 @@ function openProd(id) {
   curProd=D.products.find(p=>p.id===id); if(!curProd)return;
   const p=curProd; killThree(); killPZ(); curView='2d';
   document.getElementById('mCat').textContent=CAT_ICON[p.cat]+' '+CAT_LABEL[p.cat].toUpperCase()+' · '+(p.sub||'').toUpperCase();
-  document.getElementById('mTitle').textContent=p.name;
+  document.getElementById('mTitle').textContent=p.name||p.code||'';
   const refEl=document.getElementById('mRef');
   const refs=[p.catref&&'📋 '+p.catref,p.code&&'🏷 '+p.code].filter(Boolean);
   if(refs.length){refEl.textContent=refs.join('  ·  ');refEl.style.display='inline-block';}
@@ -1662,7 +1662,7 @@ function revealSup() {
 }
 function enquireWA() {
   const p=curProd,phone=(D.settings.wa||'').replace(/\D/g,'');
-  const msg='Hello Sri Lalitha Jewellery!\n\nI am interested in:\n*'+p.name+'*\n'+p.sub+' · '+CAT_LABEL[p.cat]
+  const msg='Hello Sri Lalitha Jewellery!\n\nI am interested in:\n*'+(p.name||p.code||'')+'*\n'+p.sub+' · '+CAT_LABEL[p.cat]
     +(p.code?'\nCode: '+p.code:'')+(p.catref?'\nRef: '+p.catref:'')+'\n\nPlease share more details. Thank you!';
   window.open('https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(msg),'_blank');
 }
@@ -1792,6 +1792,7 @@ function showAdminPanel(){
   document.getElementById('authWrap').style.display='none';document.getElementById('adminPanel').style.display='flex';
   const user=auth.currentUser;if(user)document.getElementById('adminEmailLabel').textContent=user.email||'';
   refreshSubSelect();
+  if(!editId)document.getElementById('fcode').value=genDesignCode();
 }
 async function logout(){await auth.signOut();loggedIn=false;closeAdmin();}
 async function sendPwReset(){
@@ -1876,7 +1877,8 @@ async function uploadImage(file,path,progId,barId){
   });
 }
 async function saveProduct(){
-  const name=document.getElementById('fn').value.trim();if(!name){toast('Enter a design name','err');return;}
+  const name=document.getElementById('fn').value.trim();
+  const code=document.getElementById('fcode').value.trim();if(!code){toast('Design code is required','err');return;}
   const btn=document.getElementById('saveBtn'),status=document.getElementById('saveStatus');
   btn.disabled=true;btn.textContent='Saving...';
   try{
@@ -1922,7 +1924,8 @@ function editProd(id){
 }
 function clearForm(){
   editId=null;editImg2d='';editImg360='';document.getElementById('addPanelTitle').textContent='Add New Design';document.getElementById('saveBtn').textContent='Save Design';
-  ['fn','fcode','fwt','fpur','fmk','fst','fcref','fnotes','ssup','scat','spg','sitm','scon','sloc','snotes'].forEach(id=>document.getElementById(id).value='');
+  ['fn','fwt','fpur','fmk','fst','fcref','fnotes','ssup','scat','spg','sitm','scon','sloc','snotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fcode').value=genDesignCode();
   document.getElementById('fcat').value='gold';refreshSubSelect();document.getElementById('f2d').value='';document.getElementById('f360').value='';
   ['p2d','p360'].forEach(id=>{const img=document.getElementById(id);img.style.display='none';img.src='';});
   document.getElementById('p2dp').style.display='block';document.getElementById('p360p').style.display='block';
@@ -1932,7 +1935,7 @@ function renderAdminList(){
   const ps=filter?D.products.filter(p=>p.cat===filter):D.products;
   if(!ps.length){list.innerHTML='';emp.style.display='block';return;}
   emp.style.display='none';
-  list.innerHTML=ps.map(p=>'<div class="ap-card">'+(p.img2d?'<img src="'+p.img2d+'" alt="'+esc(p.name)+'">':'<div class="ap-no-img">'+getSubIcon(p.cat,p.sub)+'</div>')+'<div class="ap-info"><div class="ap-name" title="'+esc(p.name)+'">'+esc(p.name)+'</div><div class="ap-meta">'+CAT_LABEL[p.cat]+' · '+(p.sub||'')+(p.code?' · '+p.code:'')+'</div><div class="ap-acts"><button class="btn btn-outline btn-sm" onclick=\'editProd('+JSON.stringify(p.id)+')\'>Edit</button><button class="btn btn-danger btn-sm" onclick=\'delProd('+JSON.stringify(p.id)+')\'>Del</button></div></div></div>').join('');
+  list.innerHTML=ps.map(p=>{const dname=p.name||p.code||'';return '<div class="ap-card">'+(p.img2d?'<img src="'+p.img2d+'" alt="'+esc(dname)+'">':'<div class="ap-no-img">'+getSubIcon(p.cat,p.sub)+'</div>')+'<div class="ap-info"><div class="ap-name" title="'+esc(dname)+'">'+esc(dname)+'</div><div class="ap-meta">'+CAT_LABEL[p.cat]+' · '+(p.sub||'')+(p.code?' · '+p.code:'')+'</div><div class="ap-acts"><button class="btn btn-outline btn-sm" onclick=\'editProd('+JSON.stringify(p.id)+')\'>Edit</button><button class="btn btn-danger btn-sm" onclick=\'delProd('+JSON.stringify(p.id)+')\'>Del</button></div></div></div>';}).join('');
 }
 
 // ── SETTINGS ──────────────────────────────────────
@@ -1950,6 +1953,7 @@ async function nukeAll(){
 }
 
 // ── UTILITIES ─────────────────────────────────────
+function genDesignCode(){const n=new Date();const pad=v=>String(v).padStart(2,'0');return 'DC-'+n.getFullYear()+pad(n.getMonth()+1)+pad(n.getDate())+'-'+pad(n.getHours())+pad(n.getMinutes())+pad(n.getSeconds());}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+(type||'')+' show';clearTimeout(el._t);el._t=setTimeout(()=>el.className='toast '+(type||''),3200);}
 document.addEventListener('keydown',e=>{
