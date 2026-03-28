@@ -2329,6 +2329,7 @@ async function openShareMenu(e, id) {
   // Fetch image blob in background (for native share + save)
   if (p.img2d) {
     statusEl.textContent = '⏳ Loading image…';
+    statusEl.style.color = 'var(--muted)';
     const subEl = document.getElementById('shareNativeSub');
     try {
       const resp = await fetch(p.img2d, {mode:'cors'});
@@ -2339,9 +2340,11 @@ async function openShareMenu(e, id) {
       statusEl.style.color = '#4caf50';
       if (subEl) subEl.textContent = 'Tap to share image + text to any app';
     } catch(err) {
-      statusEl.textContent = '⚠ Image unavailable — will share text only';
-      statusEl.style.color = 'var(--bronze)';
-      if (subEl) subEl.textContent = 'Will share text + link (image could not load)';
+      // CORS not configured — image loads in <img> but fetch is blocked.
+      // Fall back: share the direct image URL so recipients can open it.
+      statusEl.textContent = '🔗 Sharing as image link';
+      statusEl.style.color = 'var(--muted)';
+      if (subEl) subEl.textContent = 'Recipient can tap the link to view the image';
     }
   }
 }
@@ -2349,17 +2352,18 @@ async function openShareMenu(e, id) {
 async function doNativeShare() {
   const p = window._shareProduct; if(!p) return;
   const name = p.name || p.code || 'Design';
-  let shareData = {
-    title: 'Sri Lalitha Jewellery — '+name,
-    text:  window._shareText
-  };
+  let shareData = { title: 'Sri Lalitha Jewellery — '+name, text: window._shareText };
   if (_shareImgBlob) {
+    // Best case: CORS configured — share as actual image file
     try {
       const ext = (_shareImgBlob.type||'image/jpeg').split('/')[1]||'jpg';
       const file = new File([_shareImgBlob], 'design-'+(p.code||'item')+'.'+ext, {type:_shareImgBlob.type});
       const withFile = {title:shareData.title, text:shareData.text, files:[file]};
       if (navigator.canShare && navigator.canShare(withFile)) shareData = withFile;
     } catch(_){}
+  } else if (p.img2d) {
+    // CORS not configured — share image URL so recipient can tap to view it
+    shareData.url = p.img2d;
   }
   try {
     await navigator.share(shareData);
