@@ -2055,10 +2055,10 @@ function closeModal() {
 }
 function handleModalBg(e){if(e.target===document.getElementById('pModal'))closeModal();}
 function enquireWA() {
-  const p=curProd,phone=(D.settings.wa||'').replace(/\D/g,'');
+  const p=curProd;
   const msg='Hello Sri Lalitha Jewellery!\n\nI am interested in:\n*'+(p.name||p.code||'')+'*\n'+p.sub+' · '+CAT_LABEL[p.cat]
     +(p.code?'\nCode: '+p.code:'')+(p.catref?'\nRef: '+p.catref:'')+'\n\nPlease share more details. Thank you!';
-  window.open('https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(msg),'_blank');
+  window.open('https://wa.me/918186809413?text='+encodeURIComponent(msg),'_blank');
 }
 
 // ── PAN / ZOOM ENGINE ─────────────────────────────
