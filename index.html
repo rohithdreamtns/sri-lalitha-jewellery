@@ -674,6 +674,62 @@ header{
 .apanel{display:none}
 .apanel.active{display:block}
 
+/* Bulk Upload */
+.bulk-drop{
+  border:2px dashed var(--border-g);border-radius:var(--r);
+  padding:2.5rem 1rem;text-align:center;cursor:pointer;
+  transition:border-color var(--t) var(--ease),background var(--t) var(--ease);
+  margin-bottom:1.25rem;
+}
+.bulk-drop:hover,.bulk-drop.drag-over{border-color:var(--gold);background:rgba(201,168,100,0.05)}
+.bulk-drop input{display:none}
+.bulk-drop-icon{font-size:2.2rem;margin-bottom:0.5rem}
+.bulk-drop-text{font-size:0.9rem;color:var(--muted)}
+.bulk-drop-text span{color:var(--gold);cursor:pointer}
+.bulk-preview-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:0.75rem;margin-bottom:1.25rem;
+}
+.bulk-thumb{
+  position:relative;border-radius:var(--rs);overflow:hidden;
+  border:1px solid var(--border);background:var(--dark3);
+  aspect-ratio:1;
+}
+.bulk-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.bulk-thumb-name{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(6,6,10,0.75);font-size:0.58rem;
+  color:var(--muted);padding:0.2rem 0.3rem;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.bulk-thumb-rm{
+  position:absolute;top:3px;right:3px;
+  width:18px;height:18px;border-radius:50%;
+  background:rgba(200,40,40,0.85);color:#fff;
+  font-size:0.7rem;line-height:18px;text-align:center;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.bulk-thumb-ok{
+  position:absolute;inset:0;
+  background:rgba(40,160,80,0.55);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;
+}
+.bulk-thumb-err{
+  position:absolute;inset:0;
+  background:rgba(200,40,40,0.55);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;
+}
+.bulk-progress-row{
+  height:6px;background:var(--dark3);border-radius:3px;
+  margin-bottom:1.25rem;overflow:hidden;
+}
+.bulk-progress-bar{
+  height:100%;background:var(--gold);border-radius:3px;
+  transition:width 0.3s;width:0%;
+}
+
 /* Auth */
 .auth-wrap{
   display:flex;flex-direction:column;align-items:center;
@@ -1157,6 +1213,7 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
     </div>
     <div class="admin-tabs-bar">
       <button class="atab active" onclick="aTab('add')">➕ Add Design</button>
+      <button class="atab" onclick="aTab('bulk')">⬆️ Bulk Upload</button>
       <button class="atab" onclick="aTab('manage')">📦 Manage Designs</button>
       <button class="atab" onclick="aTab('cats')">🗂 Categories</button>
       <button class="atab" onclick="aTab('settings')">🔧 Settings</button>
@@ -1280,6 +1337,41 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
           <button class="btn btn-gold" id="saveBtn" onclick="saveProduct()">💾 Save Design</button>
           <button class="btn btn-outline" onclick="clearForm()">Clear Form</button>
           <span id="saveStatus" style="font-size:0.75rem;color:var(--muted)"></span>
+        </div>
+      </div>
+
+      <!-- ── BULK UPLOAD ── -->
+      <div class="apanel" id="apanel-bulk">
+        <div class="sec-title-a">Bulk Upload Designs</div>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1.25rem">Select multiple images — each image becomes a separate design with a unique auto-generated code. All other fields are left empty and can be filled in later.</p>
+        <div class="fgrid" style="margin-bottom:1.25rem">
+          <div class="fg">
+            <label class="fl">Category *</label>
+            <select class="inp" id="bulkCat" onchange="refreshBulkSubSelect()">
+              <option value="gold">Gold</option>
+              <option value="silver">Silver</option>
+              <option value="panchaloham">Panchaloham</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Sub-Category *</label>
+            <select class="inp" id="bulkSub"></select>
+          </div>
+        </div>
+        <div class="bulk-drop" id="bulkDrop" onclick="document.getElementById('bulkFiles').click()">
+          <input type="file" id="bulkFiles" accept="image/*" multiple onchange="onBulkFilesChosen(this.files)">
+          <div class="bulk-drop-icon">🖼️</div>
+          <div class="bulk-drop-text">Drag &amp; drop images here or <span>browse files</span></div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:0.35rem">JPG, PNG, WEBP — multiple selection supported</div>
+        </div>
+        <div class="bulk-preview-grid" id="bulkGrid"></div>
+        <div class="bulk-progress-row" id="bulkProgressRow" style="display:none">
+          <div class="bulk-progress-bar" id="bulkProgressBar"></div>
+        </div>
+        <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-gold" id="bulkUploadBtn" onclick="startBulkUpload()" style="display:none">⬆️ Upload All</button>
+          <button class="btn btn-outline" onclick="clearBulkQueue()" id="bulkClearBtn" style="display:none">Clear</button>
+          <span id="bulkStatus" style="font-size:0.8rem;color:var(--muted)"></span>
         </div>
       </div>
 
@@ -1803,11 +1895,12 @@ async function sendPwReset(){
 
 // ── ADMIN TABS ────────────────────────────────────
 function aTab(t){
-  const names=['add','manage','cats','settings'];
+  const names=['add','bulk','manage','cats','settings'];
   document.querySelectorAll('.atab').forEach((el,i)=>el.classList.toggle('active',names[i]===t));
   document.querySelectorAll('.apanel').forEach(el=>el.classList.remove('active'));
   document.getElementById('apanel-'+t).classList.add('active');
   if(t==='manage')renderAdminList();if(t==='settings')loadSettingsForm();if(t==='cats')renderCatPanel();
+  if(t==='bulk')refreshBulkSubSelect();
 }
 
 // ── SUBCATEGORY MANAGEMENT ────────────────────────
@@ -1962,6 +2055,127 @@ document.addEventListener('keydown',e=>{
     if(document.getElementById('pModal').classList.contains('open'))closeModal();
     if(document.getElementById('adminOv').classList.contains('open')&&!loggedIn)closeAdmin();
   }
+});
+
+// ── BULK UPLOAD ───────────────────────────────────
+let bulkFiles=[];
+function refreshBulkSubSelect(){
+  const cat=document.getElementById('bulkCat').value;
+  const sel=document.getElementById('bulkSub');if(!sel)return;
+  const subs=D.subcats[cat]||DEF_SUBCATS[cat]||[];
+  sel.innerHTML=subs.map(s=>'<option>'+esc(s)+'</option>').join('');
+}
+function onBulkFilesChosen(fileList){
+  const incoming=Array.from(fileList);
+  // avoid duplicates by name+size
+  incoming.forEach(f=>{
+    if(!bulkFiles.find(x=>x.name===f.name&&x.size===f.size))bulkFiles.push(f);
+  });
+  document.getElementById('bulkFiles').value='';
+  renderBulkGrid();
+}
+function renderBulkGrid(){
+  const grid=document.getElementById('bulkGrid');
+  const btn=document.getElementById('bulkUploadBtn');
+  const clr=document.getElementById('bulkClearBtn');
+  if(!bulkFiles.length){grid.innerHTML='';btn.style.display='none';clr.style.display='none';return;}
+  btn.style.display='';clr.style.display='';
+  grid.innerHTML=bulkFiles.map((f,i)=>{
+    const url=URL.createObjectURL(f);
+    return '<div class="bulk-thumb" id="bthumb-'+i+'">'
+      +'<img src="'+url+'" onload="URL.revokeObjectURL(this.src)">'
+      +'<div class="bulk-thumb-name">'+esc(f.name)+'</div>'
+      +'<div class="bulk-thumb-rm" onclick="removeBulkFile('+i+')">✕</div>'
+      +'</div>';
+  }).join('');
+}
+function removeBulkFile(i){
+  bulkFiles.splice(i,1);renderBulkGrid();
+}
+function clearBulkQueue(){
+  bulkFiles=[];renderBulkGrid();
+  document.getElementById('bulkStatus').textContent='';
+  document.getElementById('bulkProgressRow').style.display='none';
+  document.getElementById('bulkProgressBar').style.width='0%';
+}
+function genBulkDesignCode(index){
+  const n=new Date();const pad=v=>String(v).padStart(2,'0');
+  return 'DC-'+n.getFullYear()+pad(n.getMonth()+1)+pad(n.getDate())+'-'+pad(n.getHours())+pad(n.getMinutes())+pad(n.getSeconds())+'-'+String(index+1).padStart(3,'0');
+}
+async function startBulkUpload(){
+  if(!bulkFiles.length){toast('No images selected','err');return;}
+  const cat=document.getElementById('bulkCat').value;
+  const sub=document.getElementById('bulkSub').value;
+  const btn=document.getElementById('bulkUploadBtn');
+  const status=document.getElementById('bulkStatus');
+  const progressRow=document.getElementById('bulkProgressRow');
+  const progressBar=document.getElementById('bulkProgressBar');
+  btn.disabled=true;btn.textContent='Uploading...';
+  progressRow.style.display='block';progressBar.style.width='0%';
+  let done=0,errors=0;
+  const total=bulkFiles.length;
+  for(let i=0;i<total;i++){
+    const f=bulkFiles[i];
+    const thumb=document.getElementById('bthumb-'+i);
+    status.textContent='Uploading '+(i+1)+' of '+total+': '+f.name;
+    try{
+      const docId=db.collection('products').doc().id;
+      const code=genBulkDesignCode(i);
+      const imgPath='images/'+docId+'/2d_'+Date.now();
+      const imgUrl=await new Promise((res,rej)=>{
+        const task=storage.ref(imgPath).put(f);
+        task.on('state_changed',null,rej,async()=>res(await task.snapshot.ref.getDownloadURL()));
+      });
+      await db.collection('products').doc(docId).set({
+        name:'',cat,sub,code,wt:'',pur:'',mk:'',stone:'',catref:'',notes:'',
+        img2d:imgUrl,img360:'',
+        sup:{name:'',cat:'',pg:'',itm:'',contact:'',loc:'',notes:''},
+        ts:firebase.firestore.FieldValue.serverTimestamp()
+      });
+      done++;
+      if(thumb){
+        const ok=document.createElement('div');ok.className='bulk-thumb-ok';ok.textContent='✓';
+        thumb.querySelector('.bulk-thumb-rm').remove();thumb.appendChild(ok);
+      }
+    }catch(e){
+      errors++;
+      if(thumb){
+        const er=document.createElement('div');er.className='bulk-thumb-err';er.textContent='✗';
+        thumb.appendChild(er);
+      }
+      console.error('Bulk upload error for '+f.name,e);
+    }
+    progressBar.style.width=(((i+1)/total)*100)+'%';
+  }
+  btn.disabled=false;btn.textContent='⬆️ Upload All';
+  if(errors===0){
+    status.textContent='All '+done+' designs uploaded successfully!';
+    toast('Bulk upload complete! '+done+' designs added','ok');
+    bulkFiles=[];
+    document.getElementById('bulkClearBtn').style.display='none';
+    btn.style.display='none';
+  }else{
+    status.textContent=done+' uploaded, '+errors+' failed. Retry failed ones or remove them.';
+    toast(done+' uploaded, '+errors+' failed','err');
+    // keep only failed files for retry
+    const failedThumbIndices=[];
+    document.querySelectorAll('#bulkGrid .bulk-thumb').forEach((el,i)=>{
+      if(!el.querySelector('.bulk-thumb-ok'))failedThumbIndices.push(i);
+    });
+    bulkFiles=bulkFiles.filter((_,i)=>failedThumbIndices.includes(i));
+    renderBulkGrid();
+  }
+}
+// drag-and-drop support for bulk upload area
+document.addEventListener('DOMContentLoaded',()=>{
+  const drop=document.getElementById('bulkDrop');
+  if(!drop)return;
+  drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('drag-over');});
+  drop.addEventListener('dragleave',()=>drop.classList.remove('drag-over'));
+  drop.addEventListener('drop',e=>{
+    e.preventDefault();drop.classList.remove('drag-over');
+    onBulkFilesChosen(e.dataTransfer.files);
+  });
 });
 
 // ── START ─────────────────────────────────────────
