@@ -889,25 +889,44 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
 /* Filter bar */
 .filter-bar{
   display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:0.75rem;
+  margin-bottom:0.75rem;flex-wrap:wrap;gap:0.5rem;
 }
-.search-wrap{
-  position:relative;
-  max-width:280px;width:100%;
+/* Search bar */
+.search-bar-wrap{
+  position:relative;width:100%;margin-bottom:1rem;
 }
-.search-ico{
-  position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);
-  font-size:0.8rem;color:var(--muted);pointer-events:none;
+.search-bar-ico{
+  position:absolute;left:1rem;top:50%;transform:translateY(-50%);
+  font-size:1rem;color:var(--muted);pointer-events:none;z-index:1;
 }
-.search-inp{
-  width:100%;padding:0.5rem 1rem 0.5rem 2.2rem;
+.search-bar-inp{
+  width:100%;padding:0.75rem 2.8rem 0.75rem 2.8rem;
   background:var(--dark2);border:1px solid var(--border);
   border-radius:50px;color:var(--text);
-  font-family:'Jost',sans-serif;font-size:0.82rem;
-  outline:none;transition:border-color 0.2s;
+  font-family:'Jost',sans-serif;font-size:0.88rem;
+  outline:none;transition:border-color 0.25s,box-shadow 0.25s;
 }
-.search-inp:focus{border-color:var(--gold)}
-.search-inp::placeholder{color:var(--muted)}
+.search-bar-inp:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(201,168,100,0.12);
+}
+.search-bar-inp::placeholder{color:var(--muted)}
+.search-bar-clear{
+  position:absolute;right:1rem;top:50%;transform:translateY(-50%);
+  width:22px;height:22px;border-radius:50%;
+  background:var(--border);border:none;color:var(--muted);
+  font-size:0.75rem;cursor:pointer;
+  display:none;align-items:center;justify-content:center;
+  transition:background 0.2s,color 0.2s;
+}
+.search-bar-clear:hover{background:var(--gold);color:var(--obsidian)}
+.search-bar-clear.visible{display:flex}
+.search-results-note{
+  font-size:0.75rem;color:var(--gold);
+  margin-bottom:0.5rem;display:none;
+}
+/* keep old small search hidden (replaced) */
+.search-wrap{display:none}
 
 /* Responsive */
 @media(max-width:1024px){
@@ -1098,15 +1117,19 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
   <!-- Sub-category bar -->
   <div class="sub-bar" id="subBar"></div>
 
+  <!-- Search bar -->
+  <div class="search-bar-wrap">
+    <span class="search-bar-ico">🔍</span>
+    <input class="search-bar-inp" id="searchInp" placeholder="Search by name or design code…" oninput="onSearchInput()" autocomplete="off" spellcheck="false">
+    <button class="search-bar-clear" id="searchClear" onclick="clearSearch()" title="Clear">✕</button>
+  </div>
+  <div class="search-results-note" id="searchNote"></div>
+
   <!-- Filter bar -->
   <div class="filter-bar">
     <div class="sec-head" style="margin-bottom:0;flex:1">
       <div class="sec-title" id="secTitle">Gold Designs</div>
       <div class="sec-count" id="secCount"></div>
-    </div>
-    <div class="search-wrap" style="margin-left:1rem">
-      <span class="search-ico">🔍</span>
-      <input class="search-inp" id="searchInp" placeholder="Search designs..." oninput="renderProducts()">
     </div>
   </div>
 
@@ -1657,6 +1680,8 @@ function pickCat(c) {
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.c===c));
   document.getElementById('secTitle').textContent = CAT_LABEL[c] + ' Designs';
   document.getElementById('searchInp').value = '';
+  document.getElementById('searchClear').classList.remove('visible');
+  document.getElementById('searchNote').style.display='none';
   renderSubs(); renderProducts();
   document.getElementById('catalogueSection').scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -1682,18 +1707,50 @@ function renderSubs() {
   ).join('');
 }
 function getProducts() {
-  const q = (document.getElementById('searchInp').value||'').toLowerCase();
+  const q = (document.getElementById('searchInp').value||'').toLowerCase().trim();
+  if(q) {
+    // global search across all categories
+    return D.products.filter(p=>
+      (p.name||'').toLowerCase().includes(q) || (p.code||'').toLowerCase().includes(q)
+    );
+  }
   return D.products.filter(p => {
     if(p.cat!==curCat)return false;
     if(curSub!=='All'&&p.sub!==curSub)return false;
-    if(q&&!(p.name||'').toLowerCase().includes(q)&&!(p.code||'').toLowerCase().includes(q))return false;
     return true;
   });
+}
+function onSearchInput() {
+  const q = (document.getElementById('searchInp').value||'').trim();
+  const clr = document.getElementById('searchClear');
+  const note = document.getElementById('searchNote');
+  clr.classList.toggle('visible', q.length > 0);
+  if(q) {
+    note.style.display = 'block';
+    note.textContent = 'Searching across all categories…';
+  } else {
+    note.style.display = 'none';
+  }
+  renderProducts();
+}
+function clearSearch() {
+  document.getElementById('searchInp').value = '';
+  document.getElementById('searchClear').classList.remove('visible');
+  document.getElementById('searchNote').style.display = 'none';
+  renderProducts();
+  document.getElementById('searchInp').focus();
 }
 function renderProducts() {
   const grid=document.getElementById('pGrid'), emp=document.getElementById('emptyEl');
   const ps=getProducts();
-  document.getElementById('secCount').textContent = ps.length ? ps.length+' design'+(ps.length!==1?'s':'') : '';
+  const q=(document.getElementById('searchInp').value||'').trim();
+  const note=document.getElementById('searchNote');
+  if(q && note.style.display!=='none') {
+    note.textContent = ps.length
+      ? 'Found '+ps.length+' result'+(ps.length!==1?'s':'')+' across all categories'
+      : 'No results found for "'+q+'"';
+  }
+  document.getElementById('secCount').textContent = (!q && ps.length) ? ps.length+' design'+(ps.length!==1?'s':'') : '';
   if(!ps.length){grid.innerHTML='';emp.style.display='block';return;}
   emp.style.display='none';
   grid.innerHTML=ps.map((p,i)=>cardHTML(p,i)).join('');
