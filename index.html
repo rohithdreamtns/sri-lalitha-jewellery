@@ -2149,28 +2149,51 @@ document.addEventListener('keydown',e=>{
 });
 
 // ── SHARE ─────────────────────────────────────────
-function openShareMenu(e, id) {
+async function openShareMenu(e, id) {
   const p = D.products.find(x => x.id === id); if(!p) return;
-  closeShareMenu();
   const siteUrl = window.location.origin + window.location.pathname;
   const name = p.name || p.code || 'Design';
-  const text = '✨ Check out this beautiful jewellery design from *Sri Lalitha Jewellery*!'
-    + (p.name ? '\n\n*' + p.name + '*' : '')
-    + (p.code ? '\nDesign Code: ' + p.code : '')
-    + '\nCategory: ' + CAT_LABEL[p.cat] + (p.sub ? ' · ' + p.sub : '')
-    + (p.wt ? '\nWeight: ' + p.wt : '')
-    + '\n\n🔗 ' + siteUrl;
-  const enc = encodeURIComponent(text);
-  // Store in a global so onclick handlers can access without embedded quotes
+  const shareText = '✨ Sri Lalitha Jewellery\n'
+    + (p.name ? p.name + '\n' : '')
+    + (p.code ? 'Design Code: ' + p.code + '\n' : '')
+    + CAT_LABEL[p.cat] + (p.sub ? ' · ' + p.sub : '')
+    + (p.wt ? ' · ' + p.wt : '')
+    + '\n🔗 ' + siteUrl;
+
+  // ── Mobile: native share sheet (sends actual image to WhatsApp/Instagram/etc.) ──
+  if (navigator.share) {
+    try {
+      let shareData = { title: 'Sri Lalitha Jewellery — ' + name, text: shareText };
+      // Attach the image file if available and the browser supports file sharing
+      if (p.img2d && navigator.canShare) {
+        try {
+          const resp = await fetch(p.img2d);
+          const blob = await resp.blob();
+          const ext = (blob.type || 'image/jpeg').split('/')[1] || 'jpg';
+          const file = new File([blob], 'design-' + (p.code || 'item') + '.' + ext, { type: blob.type });
+          const withFile = { title: shareData.title, text: shareText, files: [file] };
+          if (navigator.canShare(withFile)) shareData = withFile;
+        } catch(_) { /* image fetch failed — share text only */ }
+      }
+      await navigator.share(shareData);
+      return; // native sheet handled it
+    } catch(err) {
+      if (err.name === 'AbortError') return; // user cancelled — do nothing
+      // other error — fall through to dropdown
+    }
+  }
+
+  // ── Desktop fallback: dropdown menu ──
+  closeShareMenu();
+  const enc = encodeURIComponent(shareText);
   window._sl = {
     wa: 'https://api.whatsapp.com/send?text=' + enc,
-    tg: 'https://t.me/share/url?url=' + encodeURIComponent(siteUrl) + '&text=' + encodeURIComponent(text),
+    tg: 'https://t.me/share/url?url=' + encodeURIComponent(siteUrl) + '&text=' + encodeURIComponent(shareText),
     fb: 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(siteUrl) + '&quote=' + enc,
     tw: 'https://twitter.com/intent/tweet?text=' + enc,
     ig: name + (p.code ? ' | Code: ' + p.code : '') + '\n' + siteUrl,
     site: siteUrl
   };
-
   const menu = document.createElement('div');
   menu.className = 'share-menu'; menu.id = 'shareMenuPop';
   menu.innerHTML =
@@ -2182,9 +2205,7 @@ function openShareMenu(e, id) {
     +'<div class="share-menu-sep"></div>'
     +'<div class="share-menu-item" onclick="copyAndClose(window._sl.ig)"><span>📸</span> Copy for Instagram</div>'
     +'<div class="share-menu-item" onclick="copyAndClose(window._sl.site)"><span>🔗</span> Copy Link</div>';
-
   document.body.appendChild(menu);
-  // Position the menu near the button, keeping it on-screen
   const btn = e.target.closest('button') || e.target;
   const rect = btn.getBoundingClientRect();
   const mw = 210, mh = 290;
