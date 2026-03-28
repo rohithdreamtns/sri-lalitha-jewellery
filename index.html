@@ -571,18 +571,6 @@ header{
   padding:0.7rem 0.85rem;
   grid-column:1/-1;
 }
-.supplier-box{
-  background:rgba(201,168,100,0.04);
-  border:1px solid rgba(201,168,100,0.18);
-  border-radius:var(--rs);padding:1rem;
-}
-.supplier-head{
-  font-size:0.75rem;color:var(--gold);
-  font-weight:500;margin-bottom:0.3rem;
-  display:flex;align-items:center;gap:0.4rem;
-}
-.supplier-desc{font-size:0.72rem;color:var(--muted);margin-bottom:0.6rem}
-.key-row{display:flex;gap:0.5rem}
 .inp{
   flex:1;padding:0.55rem 0.9rem;
   background:var(--dark3);border:1px solid var(--border);
@@ -592,17 +580,6 @@ header{
 }
 .inp:focus{border-color:var(--gold)}
 .inp::placeholder{color:var(--muted)}
-.supplier-info-revealed{
-  background:rgba(201,168,100,0.06);
-  border:1px solid var(--gold);
-  border-radius:var(--rs);padding:0.75rem;
-  margin-top:0.5rem;font-size:0.8rem;
-}
-.s-row{margin-bottom:0.35rem}
-.s-label{
-  font-size:0.6rem;color:var(--gold);
-  letter-spacing:0.1em;text-transform:uppercase;
-}
 .m-actions{display:flex;gap:0.6rem;flex-wrap:wrap}
 .btn{
   padding:0.6rem 1.3rem;border-radius:var(--rs);
@@ -1426,17 +1403,6 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
           </div>
         </div>
 
-        <!-- Supplier -->
-        <div class="supplier-box">
-          <div class="supplier-head">🔐 Supplier Information</div>
-          <div class="supplier-desc">Enter the access key to view confidential supplier details</div>
-          <div class="key-row">
-            <input type="password" class="inp" id="supKey" placeholder="Enter access key…">
-            <button class="btn btn-gold" onclick="revealSup()">Reveal</button>
-          </div>
-          <div id="supDetails" style="display:none"></div>
-        </div>
-
         <div class="m-actions">
           <button class="btn btn-wa" onclick="enquireWA()">📱 Enquire on WhatsApp</button>
           <button class="btn btn-outline" onclick="closeModal()">Close</button>
@@ -2029,6 +1995,8 @@ function cardHTML(p,idx) {
 // ── PRODUCT MODAL ─────────────────────────────────
 function openProd(id) {
   curProd=D.products.find(p=>p.id===id); if(!curProd)return;
+  const reelWasOpen=document.getElementById('reelOv').classList.contains('open');
+  if(reelWasOpen)_closeReelDirect();
   const p=curProd; killThree(); killPZ(); curView='2d';
   document.getElementById('mCat').textContent=CAT_ICON[p.cat]+' '+CAT_LABEL[p.cat].toUpperCase()+' · '+(p.sub||'').toUpperCase();
   document.getElementById('mTitle').textContent=p.name||p.code||'';
@@ -2044,10 +2012,10 @@ function openProd(id) {
   if(p.notes){document.getElementById('mNotesWrap').style.display='block';document.getElementById('mNotesText').textContent=p.notes;}
   else document.getElementById('mNotesWrap').style.display='none';
   setupViewer(p);
-  document.getElementById('supKey').value='';
-  document.getElementById('supDetails').style.display='none';
   document.getElementById('pModal').classList.add('open');
   document.body.style.overflow='hidden';
+  if(reelWasOpen){const ri=_historyStack.lastIndexOf('reel');if(ri!==-1){_historyStack[ri]='modal';history.replaceState({view:'modal'},'');}else{_pushHistory('modal');}}
+  else{_pushHistory('modal');}
 }
 function setupViewer(p) {
   const vp=document.getElementById('imgViewport'),img=document.getElementById('m2dImg');
@@ -2070,30 +2038,18 @@ function setView(v) {
   if(v==='2d'){killThree();w360.style.display='none';ph.style.display='none';if(p.img2d){vp.style.display='flex';vc.style.display='flex';initPZ(vp,img,'zoomVal');}else{vp.style.display='none';vc.style.display='none';ph.style.display='flex';ph.textContent=getSubIcon(p.cat,p.sub);}}
   else{killPZ();vp.style.display='none';vc.style.display='none';ph.style.display='none';w360.style.display='block';setTimeout(()=>init360(p.img360),80);}
 }
-function closeModal() {
-  closeFS();document.getElementById('pModal').classList.remove('open');
+function _closeModalDirect(){
+  document.getElementById('pModal').classList.remove('open');
   document.body.style.overflow='';killThree();killPZ();curProd=null;
 }
-function handleModalBg(e){if(e.target===document.getElementById('pModal'))closeModal();}
-function revealSup() {
-  if(!curProd)return;
-  if(document.getElementById('supKey').value!==D.settings.supKey){toast('Incorrect access key','err');document.getElementById('supKey').value='';return;}
-  const s=curProd.sup||{};
-  const has=s.name||s.contact||s.cat||s.pg||s.itm||s.loc||s.notes;
-  document.getElementById('supDetails').innerHTML=has
-    ?'<div class="supplier-info-revealed">'
-      +(s.name?'<div class="s-row"><div class="s-label">Supplier</div><div>'+esc(s.name)+'</div></div>':'')
-      +(s.loc?'<div class="s-row"><div class="s-label">Location</div><div>'+esc(s.loc)+'</div></div>':'')
-      +(s.contact?'<div class="s-row"><div class="s-label">Contact</div><div>'+esc(s.contact)+'</div></div>':'')
-      +(s.cat?'<div class="s-row"><div class="s-label">Catalogue</div><div>'+esc(s.cat)+'</div></div>':'')
-      +(s.pg?'<div class="s-row"><div class="s-label">Page</div><div>'+esc(s.pg)+'</div></div>':'')
-      +(s.itm?'<div class="s-row"><div class="s-label">Item</div><div>'+esc(s.itm)+'</div></div>':'')
-      +(s.notes?'<div class="s-row"><div class="s-label">Notes</div><div>'+esc(s.notes)+'</div></div>':'')
-      +'</div>'
-    :'<div class="supplier-info-revealed" style="color:var(--muted)">No supplier info added.</div>';
-  document.getElementById('supDetails').style.display='block';
-  toast('Supplier info revealed ✓','ok');
+function closeModal() {
+  const fsOpen=document.getElementById('fsOverlay').classList.contains('open');
+  if(fsOpen)_closeFSDirect();
+  _closeModalDirect();
+  const views=['modal'];if(fsOpen)views.push('fs');
+  _popHistoryFor(views);
 }
+function handleModalBg(e){if(e.target===document.getElementById('pModal'))closeModal();}
 function enquireWA() {
   const p=curProd,phone=(D.settings.wa||'').replace(/\D/g,'');
   const msg='Hello Sri Lalitha Jewellery!\n\nI am interested in:\n*'+(p.name||p.code||'')+'*\n'+p.sub+' · '+CAT_LABEL[p.cat]
@@ -2142,13 +2098,18 @@ function openFullscreen() {
   img.src=curProd.img2d;img.style.transform='';
   document.getElementById('fsOverlay').classList.add('open');
   document.body.style.overflow='hidden';
+  _pushHistory('fs');
   const hint=document.getElementById('fsHint');
   if(hint){hint.style.animation='none';void hint.offsetWidth;hint.style.animation='';}
   setTimeout(()=>{killFsPZ();fsPz=initFsPZ(vp,img);},60);
 }
-function closeFS(){
+function _closeFSDirect(){
   document.getElementById('fsOverlay').classList.remove('open');killFsPZ();
   if(!document.getElementById('pModal').classList.contains('open'))document.body.style.overflow='';
+}
+function closeFS(){
+  _closeFSDirect();
+  _popHistoryFor('fs');
 }
 function killFsPZ(){if(fsPz){fsPz.unbind();fsPz=null;}}
 function fsctrl(cmd){if(fsPz)fsPz.ctrl(cmd);}
@@ -2401,6 +2362,30 @@ document.addEventListener('keydown',e=>{
   }
 });
 
+// ── BACK BUTTON (HISTORY API) ──────────────────────
+function _pushHistory(view){history.pushState({view},'');_historyStack.push(view);}
+function _popHistoryFor(views){
+  const list=Array.isArray(views)?views:[views];
+  let removed=0;
+  list.forEach(v=>{const i=_historyStack.lastIndexOf(v);if(i!==-1){_historyStack.splice(i,1);removed++;}});
+  if(removed>0){_skipPopState++;history.go(-removed);}
+}
+window.addEventListener('popstate',e=>{
+  if(_skipPopState>0){_skipPopState--;return;}
+  const v=e.state&&e.state.view;
+  if(v)_historyStack=_historyStack.filter(x=>x!==v);
+  if(v==='fs'){
+    if(document.getElementById('fsOverlay').classList.contains('open'))_closeFSDirect();
+  }else if(v==='share'){
+    if(document.getElementById('shareOv').classList.contains('open'))_closeShareOvDirect();
+  }else if(v==='reel'){
+    if(document.getElementById('reelOv').classList.contains('open'))_closeReelDirect();
+  }else if(v==='modal'){
+    if(document.getElementById('fsOverlay').classList.contains('open'))_closeFSDirect();
+    if(document.getElementById('pModal').classList.contains('open'))_closeModalDirect();
+  }
+});
+
 // ── SHARE ─────────────────────────────────────────
 let _shareImgBlob = null; // cached image blob for current share
 let _shareImgUrl  = null;
@@ -2490,6 +2475,7 @@ async function openShareMenu(e, id) {
 
   document.getElementById('shareOv').classList.add('open');
   document.body.style.overflow = 'hidden';
+  _pushHistory('share');
 
   // Fetch image blob in background (for native share + save)
   if (p.img2d) {
@@ -2577,11 +2563,15 @@ function copyAndCloseOv(text) {
   } else { fallbackCopy(text); }
 }
 
-function closeShareOv() {
+function _closeShareOvDirect() {
   document.getElementById('shareOv').classList.remove('open');
   document.body.style.overflow = '';
   if (_shareImgUrl) { URL.revokeObjectURL(_shareImgUrl); _shareImgUrl = null; }
   _shareImgBlob = null;
+}
+function closeShareOv() {
+  _closeShareOvDirect();
+  _popHistoryFor('share');
 }
 
 function copyAndClose(text) {
@@ -2720,6 +2710,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 // ── REEL VIEW ─────────────────────────────────────
 let _reelProds = [], _reelIdx = 0, _reelObs = null;
+let _historyStack = [], _skipPopState = 0;
 
 function openReel(startIdx) {
   _reelProds = getProducts();
@@ -2743,6 +2734,7 @@ function openReel(startIdx) {
 
   document.getElementById('reelOv').classList.add('open');
   document.body.style.overflow = 'hidden';
+  _pushHistory('reel');
   _reelIdx = startIdx;
   updateReelUI();
 
@@ -2766,10 +2758,14 @@ function reelGo(dir) {
   if (slide) slide.scrollIntoView({ behavior: 'smooth' });
 }
 
-function closeReel() {
+function _closeReelDirect() {
   document.getElementById('reelOv').classList.remove('open');
   document.body.style.overflow = '';
   if (_reelObs) { _reelObs.disconnect(); _reelObs = null; }
+}
+function closeReel() {
+  _closeReelDirect();
+  _popHistoryFor('reel');
 }
 
 function buildReelSlide(p, i) {
@@ -2790,8 +2786,8 @@ function buildReelSlide(p, i) {
     +   '<div class="reel-meta">' + esc(CAT_LABEL[p.cat]) + (p.sub ? ' · ' + esc(p.sub) : '') + '</div>'
     +   (tags ? '<div class="reel-tags">' + tags + '</div>' : '')
     +   '<div class="reel-btns">'
-    +     '<button class="reel-btn reel-btn-detail" onclick="closeReel();openProd(\'' + p.id + '\')">👁 Details</button>'
-    +     '<button class="reel-btn reel-btn-wa" onclick="closeReel();openProd(\'' + p.id + '\');setTimeout(enquireWA,120)">💬 Enquire</button>'
+    +     '<button class="reel-btn reel-btn-detail" onclick="openProd(\'' + p.id + '\')">👁 Details</button>'
+    +     '<button class="reel-btn reel-btn-wa" onclick="openProd(\'' + p.id + '\');setTimeout(enquireWA,120)">💬 Enquire</button>'
     +     '<button class="reel-btn reel-btn-share" data-pid="' + p.id + '" onclick="event.stopPropagation();openShareMenu(event,this.dataset.pid)">⤴ Share</button>'
     +   '</div>'
     + '</div>'
@@ -2807,6 +2803,7 @@ document.addEventListener('keydown', e => {
 });
 
 // ── START ─────────────────────────────────────────
+history.replaceState({view:'home'},'');
 initApp();
 
 </script>
