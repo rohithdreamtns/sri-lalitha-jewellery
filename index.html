@@ -2352,21 +2352,32 @@ async function openShareMenu(e, id) {
 async function doNativeShare() {
   const p = window._shareProduct; if(!p) return;
   const name = p.name || p.code || 'Design';
-  let shareData = { title: 'Sri Lalitha Jewellery — '+name, text: window._shareText };
+  const base = { title: 'Sri Lalitha Jewellery — '+name, text: window._shareText };
+
+  // ── Try 1: share with image file ──
   if (_shareImgBlob) {
-    // Best case: CORS configured — share as actual image file
     try {
-      const ext = (_shareImgBlob.type||'image/jpeg').split('/')[1]||'jpg';
-      const file = new File([_shareImgBlob], 'design-'+(p.code||'item')+'.'+ext, {type:_shareImgBlob.type});
-      const withFile = {title:shareData.title, text:shareData.text, files:[file]};
-      if (navigator.canShare && navigator.canShare(withFile)) shareData = withFile;
-    } catch(_){}
-  } else if (p.img2d) {
-    // CORS not configured — share image URL so recipient can tap to view it
-    shareData.url = p.img2d;
+      const mime = _shareImgBlob.type || 'image/jpeg';
+      const ext  = mime.includes('png') ? 'png' : mime.includes('webp') ? 'webp' : 'jpg';
+      const file = new File([_shareImgBlob], 'design-'+(p.code||'item')+'.'+ext, {type: mime});
+      const withFile = {...base, files: [file]};
+      if (navigator.canShare && !navigator.canShare(withFile)) {
+        // Device/browser doesn't support file sharing via web
+        toast('Image file sharing not supported on this browser. Use Save Image below.', 'err');
+      } else {
+        await navigator.share(withFile);
+        closeShareOv();
+        return;
+      }
+    } catch(err) {
+      if (err.name === 'AbortError') return;
+      // File share failed — fall through to text share
+    }
   }
+
+  // ── Try 2: share text + image URL (fallback) ──
   try {
-    await navigator.share(shareData);
+    await navigator.share(p.img2d ? {...base, url: p.img2d} : base);
     closeShareOv();
   } catch(err) {
     if (err.name !== 'AbortError') toast('Sharing failed: '+err.message, 'err');
