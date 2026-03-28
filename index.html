@@ -675,6 +675,74 @@ header{
 .apanel{display:none}
 .apanel.active{display:block}
 
+/* Share Modal */
+.share-ov{
+  position:fixed;inset:0;z-index:10000;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;visibility:hidden;
+  transition:opacity 0.25s,visibility 0.25s;
+}
+.share-ov.open{opacity:1;visibility:visible}
+.share-ov.open .share-sheet{transform:translateY(0)}
+.share-sheet{
+  background:var(--dark2);border-radius:var(--r) var(--r) 0 0;
+  border:1px solid var(--border-g);border-bottom:none;
+  width:100%;max-width:480px;padding:1.25rem 1.25rem 2rem;
+  transform:translateY(100%);
+  transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.share-sheet-handle{
+  width:40px;height:4px;border-radius:2px;
+  background:var(--border);margin:0 auto 1rem;
+}
+.share-sheet-head{
+  display:flex;align-items:center;gap:0.85rem;margin-bottom:1rem;
+}
+.share-sheet-thumb{
+  width:56px;height:56px;border-radius:var(--rs);
+  object-fit:cover;flex-shrink:0;border:1px solid var(--border);
+  background:var(--dark3);display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;overflow:hidden;
+}
+.share-sheet-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.share-sheet-info{flex:1;min-width:0}
+.share-sheet-name{font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.share-sheet-code{font-size:0.72rem;color:var(--gold);margin-top:0.15rem}
+.share-img-status{font-size:0.72rem;margin-top:0.1rem}
+.share-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:0.6rem;margin-bottom:1rem;
+}
+.share-icon-btn{
+  display:flex;flex-direction:column;align-items:center;gap:0.35rem;
+  padding:0.6rem 0.3rem;border-radius:var(--rs);border:none;
+  background:var(--dark3);cursor:pointer;
+  transition:background 0.2s,transform 0.15s;
+  color:var(--text);font-family:'Jost',sans-serif;
+}
+.share-icon-btn:hover{background:rgba(201,168,100,0.1);transform:scale(1.04)}
+.share-icon-btn .si{font-size:1.6rem;line-height:1}
+.share-icon-btn .sl{font-size:0.62rem;color:var(--muted)}
+.share-actions{display:flex;flex-direction:column;gap:0.5rem}
+.share-action-row{
+  display:flex;align-items:center;gap:0.75rem;
+  background:var(--dark3);border-radius:var(--rs);
+  padding:0.65rem 0.85rem;cursor:pointer;border:none;width:100%;
+  color:var(--text);font-family:'Jost',sans-serif;font-size:0.84rem;
+  transition:background 0.2s;text-align:left;
+}
+.share-action-row:hover{background:rgba(201,168,100,0.08)}
+.share-action-row .sa-icon{font-size:1.1rem;flex-shrink:0}
+.share-action-row .sa-sub{font-size:0.7rem;color:var(--muted);margin-top:0.1rem}
+@media(min-width:480px){
+  .share-sheet{border-radius:var(--r);border-bottom:1px solid var(--border-g);margin-bottom:1.5rem}
+  .share-ov{align-items:center}
+  .share-ov.open .share-sheet{transform:translateY(0)}
+  .share-sheet{transform:scale(0.94)}
+  .share-ov.open .share-sheet{transform:scale(1)}
+}
+
 /* Share Button */
 .share-btn{
   position:absolute;bottom:0.65rem;right:0.65rem;
@@ -1528,6 +1596,25 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
   </div>
 </div>
 
+<!-- SHARE MODAL -->
+<div class="share-ov" id="shareOv" onclick="if(event.target===this)closeShareOv()">
+  <div class="share-sheet" id="shareSheet">
+    <div class="share-sheet-handle"></div>
+    <div class="share-sheet-head">
+      <div class="share-sheet-thumb" id="shareThumb"></div>
+      <div class="share-sheet-info">
+        <div class="share-sheet-name" id="shareName"></div>
+        <div class="share-sheet-code" id="shareCode"></div>
+        <div class="share-img-status" id="shareImgStatus"></div>
+      </div>
+    </div>
+    <!-- Platform icons (mobile native + quick links) -->
+    <div class="share-grid" id="shareGrid"></div>
+    <!-- Action rows -->
+    <div class="share-actions" id="shareActions"></div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -2143,16 +2230,22 @@ function toast(msg,type){const el=document.getElementById('toast');el.textConten
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     if(document.getElementById('fsOverlay').classList.contains('open')){closeFS();return;}
+    if(document.getElementById('shareOv').classList.contains('open')){closeShareOv();return;}
     if(document.getElementById('pModal').classList.contains('open'))closeModal();
     if(document.getElementById('adminOv').classList.contains('open')&&!loggedIn)closeAdmin();
   }
 });
 
 // ── SHARE ─────────────────────────────────────────
+let _shareImgBlob = null; // cached image blob for current share
+let _shareImgUrl  = null;
+
 async function openShareMenu(e, id) {
   const p = D.products.find(x => x.id === id); if(!p) return;
-  const siteUrl = window.location.origin + window.location.pathname;
-  const name = p.name || p.code || 'Design';
+  _shareImgBlob = null; _shareImgUrl = null;
+
+  const siteUrl  = window.location.origin + window.location.pathname;
+  const name     = p.name || p.code || 'Design';
   const shareText = '✨ Sri Lalitha Jewellery\n'
     + (p.name ? p.name + '\n' : '')
     + (p.code ? 'Design Code: ' + p.code + '\n' : '')
@@ -2160,65 +2253,158 @@ async function openShareMenu(e, id) {
     + (p.wt ? ' · ' + p.wt : '')
     + '\n🔗 ' + siteUrl;
 
-  // ── Mobile: native share sheet (sends actual image to WhatsApp/Instagram/etc.) ──
-  if (navigator.share) {
+  // Build the modal content
+  const thumbEl   = document.getElementById('shareThumb');
+  const nameEl    = document.getElementById('shareName');
+  const codeEl    = document.getElementById('shareCode');
+  const statusEl  = document.getElementById('shareImgStatus');
+  const gridEl    = document.getElementById('shareGrid');
+  const actionsEl = document.getElementById('shareActions');
+
+  // Thumbnail
+  thumbEl.innerHTML = p.img2d
+    ? '<img src="'+p.img2d+'" alt="">'
+    : '<span>'+getSubIcon(p.cat,p.sub)+'</span>';
+  nameEl.textContent  = name;
+  codeEl.textContent  = p.code ? 'Code: '+p.code : '';
+  statusEl.textContent = '';
+  statusEl.style.color = 'var(--muted)';
+
+  const enc = encodeURIComponent(shareText);
+  const waUrl = 'https://api.whatsapp.com/send?text='+enc;
+  const tgUrl = 'https://t.me/share/url?url='+encodeURIComponent(siteUrl)+'&text='+encodeURIComponent(shareText);
+  const fbUrl = 'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(siteUrl);
+  const twUrl = 'https://twitter.com/intent/tweet?text='+enc;
+
+  // Platform icon grid
+  const platforms = [
+    {icon:'💬', label:'WhatsApp', fn:'window.open("'+waUrl+'","_blank")'},
+    {icon:'✈️', label:'Telegram', fn:'window.open("'+tgUrl+'","_blank")'},
+    {icon:'📘', label:'Facebook', fn:'window.open("'+fbUrl+'","_blank")'},
+    {icon:'𝕏',  label:'Twitter',  fn:'window.open("'+twUrl+'","_blank")'},
+  ];
+  gridEl.innerHTML = platforms.map(pl=>
+    '<button class="share-icon-btn" onclick=\''+pl.fn+'\'>'
+    +'<span class="si">'+pl.icon+'</span><span class="sl">'+pl.label+'</span></button>'
+  ).join('');
+
+  // Action rows (built fresh each open)
+  actionsEl.innerHTML =
+    // Native share (mobile) — shown only when API available
+    (navigator.share
+      ? '<button class="share-action-row" id="shareNativeBtn" onclick="doNativeShare()">'
+          +'<span class="sa-icon">📲</span>'
+          +'<div><div>Share via phone (WhatsApp, Instagram…)</div>'
+          +'<div class="sa-sub" id="shareNativeSub">Fetching image…</div></div>'
+        +'</button>'
+      : '')
+    // Save image
+    + (p.img2d
+      ? '<button class="share-action-row" onclick="saveShareImage()">'
+          +'<span class="sa-icon">⬇️</span>'
+          +'<div><div>Save Image</div>'
+          +'<div class="sa-sub">Download to your device, then share from gallery</div></div>'
+        +'</button>'
+      : '')
+    // Copy text
+    +'<button class="share-action-row" onclick="copyShareText()">'
+      +'<span class="sa-icon">📋</span>'
+      +'<div><div>Copy Share Text</div>'
+      +'<div class="sa-sub">Paste in Instagram, SMS, or anywhere</div></div>'
+    +'</button>'
+    // Copy link
+    +'<button class="share-action-row" onclick="copyAndCloseOv(\''+siteUrl+'\')">'
+      +'<span class="sa-icon">🔗</span>'
+      +'<div><div>Copy Website Link</div></div>'
+    +'</button>';
+
+  // Store share text for copy handlers
+  window._shareText = shareText;
+  window._shareSiteUrl = siteUrl;
+  window._shareProduct = p;
+
+  document.getElementById('shareOv').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Fetch image blob in background (for native share + save)
+  if (p.img2d) {
+    statusEl.textContent = '⏳ Loading image…';
+    const subEl = document.getElementById('shareNativeSub');
     try {
-      let shareData = { title: 'Sri Lalitha Jewellery — ' + name, text: shareText };
-      // Attach the image file if available and the browser supports file sharing
-      if (p.img2d && navigator.canShare) {
-        try {
-          const resp = await fetch(p.img2d);
-          const blob = await resp.blob();
-          const ext = (blob.type || 'image/jpeg').split('/')[1] || 'jpg';
-          const file = new File([blob], 'design-' + (p.code || 'item') + '.' + ext, { type: blob.type });
-          const withFile = { title: shareData.title, text: shareText, files: [file] };
-          if (navigator.canShare(withFile)) shareData = withFile;
-        } catch(_) { /* image fetch failed — share text only */ }
-      }
-      await navigator.share(shareData);
-      return; // native sheet handled it
+      const resp = await fetch(p.img2d, {mode:'cors'});
+      if (!resp.ok) throw new Error('HTTP '+resp.status);
+      _shareImgBlob = await resp.blob();
+      _shareImgUrl  = URL.createObjectURL(_shareImgBlob);
+      statusEl.textContent = '✓ Image ready';
+      statusEl.style.color = '#4caf50';
+      if (subEl) subEl.textContent = 'Tap to share image + text to any app';
     } catch(err) {
-      if (err.name === 'AbortError') return; // user cancelled — do nothing
-      // other error — fall through to dropdown
+      statusEl.textContent = '⚠ Image unavailable — will share text only';
+      statusEl.style.color = 'var(--bronze)';
+      if (subEl) subEl.textContent = 'Will share text + link (image could not load)';
     }
   }
-
-  // ── Desktop fallback: dropdown menu ──
-  closeShareMenu();
-  const enc = encodeURIComponent(shareText);
-  window._sl = {
-    wa: 'https://api.whatsapp.com/send?text=' + enc,
-    tg: 'https://t.me/share/url?url=' + encodeURIComponent(siteUrl) + '&text=' + encodeURIComponent(shareText),
-    fb: 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(siteUrl) + '&quote=' + enc,
-    tw: 'https://twitter.com/intent/tweet?text=' + enc,
-    ig: name + (p.code ? ' | Code: ' + p.code : '') + '\n' + siteUrl,
-    site: siteUrl
-  };
-  const menu = document.createElement('div');
-  menu.className = 'share-menu'; menu.id = 'shareMenuPop';
-  menu.innerHTML =
-    '<div class="share-menu-title">Share Design</div>'
-    +'<div class="share-menu-item" onclick="window.open(window._sl.wa,\'_blank\')"><span>💬</span> WhatsApp</div>'
-    +'<div class="share-menu-item" onclick="window.open(window._sl.tg,\'_blank\')"><span>✈️</span> Telegram</div>'
-    +'<div class="share-menu-item" onclick="window.open(window._sl.fb,\'_blank\')"><span>📘</span> Facebook</div>'
-    +'<div class="share-menu-item" onclick="window.open(window._sl.tw,\'_blank\')"><span>𝕏</span> Twitter / X</div>'
-    +'<div class="share-menu-sep"></div>'
-    +'<div class="share-menu-item" onclick="copyAndClose(window._sl.ig)"><span>📸</span> Copy for Instagram</div>'
-    +'<div class="share-menu-item" onclick="copyAndClose(window._sl.site)"><span>🔗</span> Copy Link</div>';
-  document.body.appendChild(menu);
-  const btn = e.target.closest('button') || e.target;
-  const rect = btn.getBoundingClientRect();
-  const mw = 210, mh = 290;
-  let top = rect.bottom + 6, left = rect.left;
-  if (left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
-  if (left < 8) left = 8;
-  if (top + mh > window.innerHeight - 8) top = rect.top - mh - 4;
-  menu.style.top = top + 'px'; menu.style.left = left + 'px';
-  setTimeout(() => document.addEventListener('click', closeShareMenu, {once:true}), 50);
 }
-function closeShareMenu() { const m=document.getElementById('shareMenuPop'); if(m) m.remove(); }
+
+async function doNativeShare() {
+  const p = window._shareProduct; if(!p) return;
+  const name = p.name || p.code || 'Design';
+  let shareData = {
+    title: 'Sri Lalitha Jewellery — '+name,
+    text:  window._shareText
+  };
+  if (_shareImgBlob) {
+    try {
+      const ext = (_shareImgBlob.type||'image/jpeg').split('/')[1]||'jpg';
+      const file = new File([_shareImgBlob], 'design-'+(p.code||'item')+'.'+ext, {type:_shareImgBlob.type});
+      const withFile = {title:shareData.title, text:shareData.text, files:[file]};
+      if (navigator.canShare && navigator.canShare(withFile)) shareData = withFile;
+    } catch(_){}
+  }
+  try {
+    await navigator.share(shareData);
+    closeShareOv();
+  } catch(err) {
+    if (err.name !== 'AbortError') toast('Sharing failed: '+err.message, 'err');
+  }
+}
+
+function saveShareImage() {
+  const p = window._shareProduct; if(!p || !p.img2d) return;
+  if (_shareImgUrl) {
+    // blob URL — create anchor download
+    const a = document.createElement('a');
+    a.href = _shareImgUrl;
+    a.download = 'design-'+(p.code||'item')+'.jpg';
+    a.click();
+  } else {
+    // Fallback: open image in new tab
+    window.open(p.img2d, '_blank');
+  }
+}
+
+function copyShareText() {
+  const t = window._shareText || '';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(()=>toast('Share text copied!','ok')).catch(()=>fallbackCopy(t));
+  } else { fallbackCopy(t); }
+}
+
+function copyAndCloseOv(text) {
+  closeShareOv();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(()=>toast('Copied!','ok')).catch(()=>fallbackCopy(text));
+  } else { fallbackCopy(text); }
+}
+
+function closeShareOv() {
+  document.getElementById('shareOv').classList.remove('open');
+  document.body.style.overflow = '';
+  if (_shareImgUrl) { URL.revokeObjectURL(_shareImgUrl); _shareImgUrl = null; }
+  _shareImgBlob = null;
+}
+
 function copyAndClose(text) {
-  closeShareMenu();
   if(navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard!','ok')).catch(()=>fallbackCopy(text));
   } else { fallbackCopy(text); }
