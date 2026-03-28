@@ -2445,14 +2445,6 @@ async function openShareMenu(e, id) {
           +'<div class="sa-sub" id="shareNativeSub">Fetching image…</div></div>'
         +'</button>'
       : '')
-    // Save image
-    + (p.img2d
-      ? '<button class="share-action-row" onclick="saveShareImage()">'
-          +'<span class="sa-icon">⬇️</span>'
-          +'<div><div>Save Image</div>'
-          +'<div class="sa-sub">Download to your device, then share from gallery</div></div>'
-        +'</button>'
-      : '')
     // Copy text
     +'<button class="share-action-row" onclick="copyShareText()">'
       +'<span class="sa-icon">📋</span>'
