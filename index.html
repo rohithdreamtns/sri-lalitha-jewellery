@@ -2376,18 +2376,11 @@ function _popHistoryFor(views){
 }
 window.addEventListener('popstate',e=>{
   if(_skipPopState>0){_skipPopState--;return;}
-  const v=e.state&&e.state.view;
-  if(v)_historyStack=_historyStack.filter(x=>x!==v);
-  if(v==='fs'){
-    if(document.getElementById('fsOverlay').classList.contains('open'))_closeFSDirect();
-  }else if(v==='share'){
-    if(document.getElementById('shareOv').classList.contains('open'))_closeShareOvDirect();
-  }else if(v==='reel'){
-    if(document.getElementById('reelOv').classList.contains('open'))_closeReelDirect();
-  }else if(v==='modal'){
-    if(document.getElementById('fsOverlay').classList.contains('open'))_closeFSDirect();
-    if(document.getElementById('pModal').classList.contains('open'))_closeModalDirect();
-  }
+  _historyStack.pop();
+  if(document.getElementById('fsOverlay').classList.contains('open')){_closeFSDirect();}
+  else if(document.getElementById('shareOv').classList.contains('open')){_closeShareOvDirect();}
+  else if(document.getElementById('reelOv').classList.contains('open')){_closeReelDirect();}
+  else if(document.getElementById('pModal').classList.contains('open')){_closeModalDirect();}
 });
 
 // ── SHARE ─────────────────────────────────────────
