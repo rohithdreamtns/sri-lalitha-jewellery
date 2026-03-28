@@ -1771,7 +1771,7 @@ function cardHTML(p,idx) {
     +(p.stone?'<span class="tag">'+esc(p.stone)+'</span>':'')
     +(p.code?'<span class="tag-code">'+esc(p.code)+'</span>':'')
     +'</div></div>'
-    +'<button class="share-btn" title="Share" onclick="event.stopPropagation();openShareMenu(event,'+JSON.stringify(p.id)+')">&#x2934;</button>'
+    +'<button class="share-btn" title="Share" data-pid="'+p.id+'" onclick="event.stopPropagation();openShareMenu(event,this.dataset.pid)">&#x2934;</button>'
     +'</div>';
 }
 
