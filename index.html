@@ -674,6 +674,37 @@ header{
 .apanel{display:none}
 .apanel.active{display:block}
 
+/* Share Button */
+.share-btn{
+  position:absolute;bottom:0.65rem;right:0.65rem;
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(201,168,100,0.12);border:1px solid rgba(201,168,100,0.28);
+  color:var(--gold);font-size:0.88rem;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:3;
+  transition:background var(--t) var(--ease),transform var(--t) var(--ease);
+}
+.share-btn:hover{background:var(--gold);color:var(--obsidian);transform:scale(1.1)}
+.share-menu{
+  position:fixed;z-index:99999;
+  background:var(--dark2);border:1px solid var(--border-g);
+  border-radius:var(--r);padding:0.45rem;
+  box-shadow:0 10px 40px rgba(0,0,0,0.7);
+  min-width:190px;
+}
+.share-menu-title{
+  font-size:0.68rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;
+  padding:0.2rem 0.7rem 0.4rem;border-bottom:1px solid var(--border);margin-bottom:0.3rem;
+}
+.share-menu-item{
+  display:flex;align-items:center;gap:0.6rem;
+  padding:0.5rem 0.75rem;border-radius:var(--rs);
+  cursor:pointer;font-size:0.83rem;color:var(--text);
+  transition:background var(--t) var(--ease);white-space:nowrap;
+}
+.share-menu-item:hover{background:rgba(201,168,100,0.1)}
+.share-menu-sep{height:1px;background:var(--border);margin:0.25rem 0.4rem}
+
 /* Bulk Upload */
 .bulk-drop{
   border:2px dashed var(--border-g);border-radius:var(--r);
@@ -1455,7 +1486,7 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
 <div class="fs-overlay" id="fsOverlay">
   <div class="fs-top">
     <div class="fs-title" id="fsTitle"></div>
-    <button class="fs-close" onclick="closeFullscreen()">✕</button>
+    <button class="fs-close" onclick="closeFS()">✕</button>
   </div>
   <div class="fs-viewport" id="fsViewport">
     <img id="fsImg" src="" alt="">
@@ -1681,7 +1712,9 @@ function cardHTML(p,idx) {
     +(p.pur?'<span class="tag">'+esc(p.pur)+'</span>':'')
     +(p.stone?'<span class="tag">'+esc(p.stone)+'</span>':'')
     +(p.code?'<span class="tag-code">'+esc(p.code)+'</span>':'')
-    +'</div></div></div>';
+    +'</div></div>'
+    +'<button class="share-btn" title="Share" onclick="event.stopPropagation();openShareMenu(event,'+JSON.stringify(p.id)+')">&#x2934;</button>'
+    +'</div>';
 }
 
 // ── PRODUCT MODAL ─────────────────────────────────
@@ -2056,6 +2089,67 @@ document.addEventListener('keydown',e=>{
     if(document.getElementById('adminOv').classList.contains('open')&&!loggedIn)closeAdmin();
   }
 });
+
+// ── SHARE ─────────────────────────────────────────
+function openShareMenu(e, id) {
+  const p = D.products.find(x => x.id === id); if(!p) return;
+  closeShareMenu();
+  const siteUrl = window.location.origin + window.location.pathname;
+  const name = p.name || p.code || 'Design';
+  const text = '✨ Check out this beautiful jewellery design from *Sri Lalitha Jewellery*!'
+    + (p.name ? '\n\n*' + p.name + '*' : '')
+    + (p.code ? '\nDesign Code: ' + p.code : '')
+    + '\nCategory: ' + CAT_LABEL[p.cat] + (p.sub ? ' · ' + p.sub : '')
+    + (p.wt ? '\nWeight: ' + p.wt : '')
+    + '\n\n🔗 ' + siteUrl;
+  const enc = encodeURIComponent(text);
+  const waUrl = 'https://api.whatsapp.com/send?text=' + enc;
+  const tgUrl = 'https://t.me/share/url?url=' + encodeURIComponent(siteUrl) + '&text=' + encodeURIComponent(text);
+  const fbUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(siteUrl) + '&quote=' + enc;
+  const twUrl = 'https://twitter.com/intent/tweet?text=' + enc;
+  const igText = name + (p.code ? ' | Code: ' + p.code : '') + '\n' + siteUrl;
+
+  const menu = document.createElement('div');
+  menu.className = 'share-menu'; menu.id = 'shareMenuPop';
+  menu.innerHTML =
+    '<div class="share-menu-title">Share Design</div>'
+    +'<div class="share-menu-item" onclick="window.open('+JSON.stringify(waUrl)+')" >'
+      +'<span>💬</span> WhatsApp</div>'
+    +'<div class="share-menu-item" onclick="window.open('+JSON.stringify(tgUrl)+')">'
+      +'<span>✈️</span> Telegram</div>'
+    +'<div class="share-menu-item" onclick="window.open('+JSON.stringify(fbUrl)+')">'
+      +'<span>📘</span> Facebook</div>'
+    +'<div class="share-menu-item" onclick="window.open('+JSON.stringify(twUrl)+')">'
+      +'<span>𝕏</span> Twitter / X</div>'
+    +'<div class="share-menu-sep"></div>'
+    +'<div class="share-menu-item" onclick="copyAndClose('+JSON.stringify(igText)+')">'
+      +'<span>📸</span> Copy for Instagram</div>'
+    +'<div class="share-menu-item" onclick="copyAndClose('+JSON.stringify(siteUrl)+')">'
+      +'<span>🔗</span> Copy Link</div>';
+
+  document.body.appendChild(menu);
+  const rect = e.target.getBoundingClientRect();
+  let top = rect.bottom + 6, left = rect.left;
+  const mw = 200, mh = 280;
+  if (left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
+  if (top + mh > window.innerHeight - 8) top = rect.top - mh - 4;
+  menu.style.top = top + 'px'; menu.style.left = left + 'px';
+  setTimeout(() => document.addEventListener('click', closeShareMenu, {once:true}), 50);
+}
+function closeShareMenu() { const m=document.getElementById('shareMenuPop'); if(m) m.remove(); }
+function copyAndClose(text) {
+  closeShareMenu();
+  if(navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard!','ok')).catch(()=>fallbackCopy(text));
+  } else { fallbackCopy(text); }
+}
+function fallbackCopy(text) {
+  const ta=document.createElement('textarea');
+  ta.value=text;ta.style.cssText='position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');toast('Copied to clipboard!','ok');}catch(e){toast('Copy failed','err');}
+  ta.remove();
+}
 
 // ── BULK UPLOAD ───────────────────────────────────
 let bulkFiles=[];
