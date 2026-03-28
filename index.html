@@ -349,8 +349,9 @@ header{
 }
 .m-viewer:hover .expand-btn,
 .m-viewer:focus-within .expand-btn{ opacity:1 }
-/* always visible on touch devices */
+/* always visible on touch / mobile */
 @media(hover:none){ .expand-btn{ opacity:1 !important } }
+@media(max-width:768px){ .expand-btn{ opacity:1 !important } }
 
 /* ── FULLSCREEN LIGHTBOX ── */
 .fs-overlay{
@@ -2103,35 +2104,36 @@ function openShareMenu(e, id) {
     + (p.wt ? '\nWeight: ' + p.wt : '')
     + '\n\n🔗 ' + siteUrl;
   const enc = encodeURIComponent(text);
-  const waUrl = 'https://api.whatsapp.com/send?text=' + enc;
-  const tgUrl = 'https://t.me/share/url?url=' + encodeURIComponent(siteUrl) + '&text=' + encodeURIComponent(text);
-  const fbUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(siteUrl) + '&quote=' + enc;
-  const twUrl = 'https://twitter.com/intent/tweet?text=' + enc;
-  const igText = name + (p.code ? ' | Code: ' + p.code : '') + '\n' + siteUrl;
+  // Store in a global so onclick handlers can access without embedded quotes
+  window._sl = {
+    wa: 'https://api.whatsapp.com/send?text=' + enc,
+    tg: 'https://t.me/share/url?url=' + encodeURIComponent(siteUrl) + '&text=' + encodeURIComponent(text),
+    fb: 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(siteUrl) + '&quote=' + enc,
+    tw: 'https://twitter.com/intent/tweet?text=' + enc,
+    ig: name + (p.code ? ' | Code: ' + p.code : '') + '\n' + siteUrl,
+    site: siteUrl
+  };
 
   const menu = document.createElement('div');
   menu.className = 'share-menu'; menu.id = 'shareMenuPop';
   menu.innerHTML =
     '<div class="share-menu-title">Share Design</div>'
-    +'<div class="share-menu-item" onclick="window.open('+JSON.stringify(waUrl)+')" >'
-      +'<span>💬</span> WhatsApp</div>'
-    +'<div class="share-menu-item" onclick="window.open('+JSON.stringify(tgUrl)+')">'
-      +'<span>✈️</span> Telegram</div>'
-    +'<div class="share-menu-item" onclick="window.open('+JSON.stringify(fbUrl)+')">'
-      +'<span>📘</span> Facebook</div>'
-    +'<div class="share-menu-item" onclick="window.open('+JSON.stringify(twUrl)+')">'
-      +'<span>𝕏</span> Twitter / X</div>'
+    +'<div class="share-menu-item" onclick="window.open(window._sl.wa,\'_blank\')"><span>💬</span> WhatsApp</div>'
+    +'<div class="share-menu-item" onclick="window.open(window._sl.tg,\'_blank\')"><span>✈️</span> Telegram</div>'
+    +'<div class="share-menu-item" onclick="window.open(window._sl.fb,\'_blank\')"><span>📘</span> Facebook</div>'
+    +'<div class="share-menu-item" onclick="window.open(window._sl.tw,\'_blank\')"><span>𝕏</span> Twitter / X</div>'
     +'<div class="share-menu-sep"></div>'
-    +'<div class="share-menu-item" onclick="copyAndClose('+JSON.stringify(igText)+')">'
-      +'<span>📸</span> Copy for Instagram</div>'
-    +'<div class="share-menu-item" onclick="copyAndClose('+JSON.stringify(siteUrl)+')">'
-      +'<span>🔗</span> Copy Link</div>';
+    +'<div class="share-menu-item" onclick="copyAndClose(window._sl.ig)"><span>📸</span> Copy for Instagram</div>'
+    +'<div class="share-menu-item" onclick="copyAndClose(window._sl.site)"><span>🔗</span> Copy Link</div>';
 
   document.body.appendChild(menu);
-  const rect = e.target.getBoundingClientRect();
+  // Position the menu near the button, keeping it on-screen
+  const btn = e.target.closest('button') || e.target;
+  const rect = btn.getBoundingClientRect();
+  const mw = 210, mh = 290;
   let top = rect.bottom + 6, left = rect.left;
-  const mw = 200, mh = 280;
   if (left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
+  if (left < 8) left = 8;
   if (top + mh > window.innerHeight - 8) top = rect.top - mh - 4;
   menu.style.top = top + 'px'; menu.style.left = left + 'px';
   setTimeout(() => document.addEventListener('click', closeShareMenu, {once:true}), 50);
