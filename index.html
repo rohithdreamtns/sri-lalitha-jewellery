@@ -2225,7 +2225,7 @@ return '<div class="sub-chip'+(isDef?' default':'')+'">'
   +'</div>';
       
     }).join('')||'<div class="no-subs">No sub-categories yet</div>';
-    const iconPicker=ICON_OPTIONS.map(ic=>'<div class="icon-opt'+((selectedIcon[cat]||ICON_OPTIONS[0])===ic?' selected':'')+'" onclick="pickIcon('+JSON.stringify(cat)+','+JSON.stringify(ic)+')">'+ic+'</div>').join('');
+    const iconPicker=ICON_OPTIONS.map(ic=>'<div class="icon-opt'+((selectedIcon[cat]||ICON_OPTIONS[0])===ic?' selected':'')+'" data-icon="'+ic+'" onclick=\'pickIcon('+JSON.stringify(cat)+','+JSON.stringify(ic)+')\'>'+ic+'</div>').join('');
     return '<div class="cat-section"><div class="cat-section-head"><div class="cat-section-title">'+labels[cat]+'<span class="cat-badge">'+subs.length+' sub-categories</span></div><button class="btn btn-gold btn-sm" onclick=\'toggleAddSubForm('+JSON.stringify(cat)+')\'">+ Add</button></div>'
       +'<div class="sub-chips">'+chips+'</div>'
       +'<div class="add-sub-form" id="addform-'+cat+'"><div style="font-size:0.72rem;color:var(--gold);font-weight:500;margin-bottom:0.5rem">Choose Icon</div>'
@@ -2240,7 +2240,7 @@ function toggleAddSubForm(cat){
   document.querySelectorAll('.add-sub-form').forEach(f=>f.classList.remove('open'));
   if(!isOpen){form.classList.add('open');if(!selectedIcon[cat])selectedIcon[cat]=ICON_OPTIONS[0];setTimeout(()=>{const inp=document.getElementById('subinp-'+cat);if(inp)inp.focus();},100);}
 }
-function pickIcon(cat,icon){selectedIcon[cat]=icon;document.querySelectorAll('#ipicker-'+cat+' .icon-opt').forEach(el=>el.classList.toggle('selected',el.textContent===icon));}
+function pickIcon(cat,icon){selectedIcon[cat]=icon;document.querySelectorAll('#ipicker-'+cat+' .icon-opt').forEach(el=>el.classList.toggle('selected',el.dataset.icon===icon));}
 async function addSubcat(cat){
   const inp=document.getElementById('subinp-'+cat),name=inp.value.trim();
   if(!name){toast('Enter a name','err');return;}
@@ -2263,15 +2263,40 @@ function refreshSubSelect(keepVal){
 }
 
 // ── PRODUCT CRUD ──────────────────────────────────
+// Compress image using canvas — resizes to max 1920px and converts to JPEG.
+// This prevents mobile camera photos (5–20 MB) from timing out on slow networks.
+function compressImage(file, maxDim=1920, quality=0.82){
+  return new Promise((resolve)=>{
+    const url=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      let w=img.naturalWidth,h=img.naturalHeight;
+      if(w<=maxDim&&h<=maxDim&&file.type==='image/jpeg'){resolve(file);return;}
+      const scale=Math.min(1,maxDim/Math.max(w,h));
+      w=Math.round(w*scale);h=Math.round(h*scale);
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      c.toBlob(blob=>resolve(blob||file),'image/jpeg',quality);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);resolve(file);};
+    img.src=url;
+  });
+}
 function handleImg(input,prevId,placeholderId){
   const file=input.files[0];if(!file)return;
   const r=new FileReader();r.onload=e=>{const prev=document.getElementById(prevId),ph=document.getElementById(placeholderId);prev.src=e.target.result;prev.style.display='block';if(ph)ph.style.display='none';};r.readAsDataURL(file);
 }
 async function uploadImage(file,path,progId,barId){
   const prog=document.getElementById(progId),bar=document.getElementById(barId);if(prog)prog.classList.add('active');
+  // Compress before upload — critical for large mobile camera photos
+  const compressed=await compressImage(file);
   return new Promise((resolve,reject)=>{
-    const timeout=setTimeout(()=>reject(new Error('Upload timed out. Check your internet connection or Firebase CORS settings.')),60000);
-    const task=storage.ref(path).put(file);
+    // Timeout scaled to file size: at least 90s, +30s per MB (handles slow mobile networks)
+    const sizeMB=compressed.size/1048576;
+    const timeoutMs=Math.max(90000,Math.round(sizeMB*30000)+60000);
+    const timeout=setTimeout(()=>reject(new Error('Upload timed out. Check your internet connection or Firebase CORS settings.')),timeoutMs);
+    const task=storage.ref(path).put(compressed);
     task.on('state_changed',snap=>{const pct=(snap.bytesTransferred/snap.totalBytes)*100;if(bar)bar.style.width=pct+'%';},
       err=>{clearTimeout(timeout);if(prog)prog.classList.remove('active');reject(err);},
       async()=>{clearTimeout(timeout);if(prog){prog.classList.remove('active');if(bar)bar.style.width='0%';}resolve(await task.snapshot.ref.getDownloadURL());}
@@ -2643,9 +2668,13 @@ async function startBulkUpload(){
       const docId=db.collection('products').doc().id;
       const code=genBulkDesignCode(i);
       const imgPath='images/'+docId+'/2d_'+Date.now();
+      const compressed=await compressImage(f);
       const imgUrl=await new Promise((res,rej)=>{
-        const task=storage.ref(imgPath).put(f);
-        task.on('state_changed',null,rej,async()=>res(await task.snapshot.ref.getDownloadURL()));
+        const sizeMB=compressed.size/1048576;
+        const timeoutMs=Math.max(90000,Math.round(sizeMB*30000)+60000);
+        const timer=setTimeout(()=>rej(new Error('Upload timed out')),timeoutMs);
+        const task=storage.ref(imgPath).put(compressed);
+        task.on('state_changed',null,err=>{clearTimeout(timer);rej(err);},async()=>{clearTimeout(timer);res(await task.snapshot.ref.getDownloadURL());});
       });
       await db.collection('products').doc(docId).set({
         name:'',cat,sub,code,wt:'',pur:'',mk:'',stone:'',catref:'',notes:'',
