@@ -1930,9 +1930,12 @@ function renderSubs(){
 function getProducts(){
   const q = (document.getElementById('searchInp').value||'').toLowerCase().trim();
   if(q) {
-    // global search across all categories
+    // global search across all categories — name, code, sub-category, and category
     return D.products.filter(p=>
-      (p.name||'').toLowerCase().includes(q) || (p.code||'').toLowerCase().includes(q)
+      (p.name||'').toLowerCase().includes(q) ||
+      (p.code||'').toLowerCase().includes(q) ||
+      (p.sub||'').toLowerCase().includes(q) ||
+      (CAT_LABEL[p.cat]||'').toLowerCase().includes(q)
     );
   }
   return D.products.filter(p=>{
