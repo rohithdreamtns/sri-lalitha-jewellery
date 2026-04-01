@@ -2263,40 +2263,15 @@ function refreshSubSelect(keepVal){
 }
 
 // ── PRODUCT CRUD ──────────────────────────────────
-// Compress image using canvas — resizes to max 1920px and converts to JPEG.
-// This prevents mobile camera photos (5–20 MB) from timing out on slow networks.
-function compressImage(file, maxDim=1920, quality=0.82){
-  return new Promise((resolve)=>{
-    const url=URL.createObjectURL(file);
-    const img=new Image();
-    img.onload=()=>{
-      URL.revokeObjectURL(url);
-      let w=img.naturalWidth,h=img.naturalHeight;
-      if(w<=maxDim&&h<=maxDim&&file.type==='image/jpeg'){resolve(file);return;}
-      const scale=Math.min(1,maxDim/Math.max(w,h));
-      w=Math.round(w*scale);h=Math.round(h*scale);
-      const c=document.createElement('canvas');c.width=w;c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
-      c.toBlob(blob=>resolve(blob||file),'image/jpeg',quality);
-    };
-    img.onerror=()=>{URL.revokeObjectURL(url);resolve(file);};
-    img.src=url;
-  });
-}
 function handleImg(input,prevId,placeholderId){
   const file=input.files[0];if(!file)return;
   const r=new FileReader();r.onload=e=>{const prev=document.getElementById(prevId),ph=document.getElementById(placeholderId);prev.src=e.target.result;prev.style.display='block';if(ph)ph.style.display='none';};r.readAsDataURL(file);
 }
 async function uploadImage(file,path,progId,barId){
   const prog=document.getElementById(progId),bar=document.getElementById(barId);if(prog)prog.classList.add('active');
-  // Compress before upload — critical for large mobile camera photos
-  const compressed=await compressImage(file);
   return new Promise((resolve,reject)=>{
-    // Timeout scaled to file size: at least 90s, +30s per MB (handles slow mobile networks)
-    const sizeMB=compressed.size/1048576;
-    const timeoutMs=Math.max(90000,Math.round(sizeMB*30000)+60000);
-    const timeout=setTimeout(()=>reject(new Error('Upload timed out. Check your internet connection or Firebase CORS settings.')),timeoutMs);
-    const task=storage.ref(path).put(compressed);
+    const timeout=setTimeout(()=>reject(new Error('Upload timed out. Check your internet connection or Firebase CORS settings.')),60000);
+    const task=storage.ref(path).put(file);
     task.on('state_changed',snap=>{const pct=(snap.bytesTransferred/snap.totalBytes)*100;if(bar)bar.style.width=pct+'%';},
       err=>{clearTimeout(timeout);if(prog)prog.classList.remove('active');reject(err);},
       async()=>{clearTimeout(timeout);if(prog){prog.classList.remove('active');if(bar)bar.style.width='0%';}resolve(await task.snapshot.ref.getDownloadURL());}
@@ -2668,13 +2643,9 @@ async function startBulkUpload(){
       const docId=db.collection('products').doc().id;
       const code=genBulkDesignCode(i);
       const imgPath='images/'+docId+'/2d_'+Date.now();
-      const compressed=await compressImage(f);
       const imgUrl=await new Promise((res,rej)=>{
-        const sizeMB=compressed.size/1048576;
-        const timeoutMs=Math.max(90000,Math.round(sizeMB*30000)+60000);
-        const timer=setTimeout(()=>rej(new Error('Upload timed out')),timeoutMs);
-        const task=storage.ref(imgPath).put(compressed);
-        task.on('state_changed',null,err=>{clearTimeout(timer);rej(err);},async()=>{clearTimeout(timer);res(await task.snapshot.ref.getDownloadURL());});
+        const task=storage.ref(imgPath).put(f);
+        task.on('state_changed',null,rej,async()=>res(await task.snapshot.ref.getDownloadURL()));
       });
       await db.collection('products').doc(docId).set({
         name:'',cat,sub,code,wt:'',pur:'',mk:'',stone:'',catref:'',notes:'',
