@@ -1249,6 +1249,163 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
 .reel-nav-btn:hover{background:rgba(201,168,100,0.45);border-color:var(--gold)}
 .reel-nav-btn:disabled{opacity:0.25;cursor:default}
 @media(max-width:600px){.reel-nav{display:none}}
+/* ── DISPLAY MODE BUTTON ── */
+.display-mode-btn{
+  display:flex;align-items:center;gap:0.45rem;
+  padding:0.45rem 1.1rem;border-radius:50px;
+  background:rgba(201,168,100,0.12);border:1px solid rgba(201,168,100,0.35);
+  color:var(--gold);font-size:0.8rem;font-family:'Jost',sans-serif;font-weight:400;
+  cursor:pointer;letter-spacing:0.04em;transition:background 0.2s,box-shadow 0.2s;
+}
+.display-mode-btn:hover{background:rgba(201,168,100,0.25);box-shadow:0 0 0 3px rgba(201,168,100,0.2);}
+.display-mode-btn:active{transform:scale(0.96)}
+
+/* ── DISPLAY / SLIDESHOW OVERLAY ── */
+#ssOv{
+  position:fixed;inset:0;z-index:7000;background:#000;
+  opacity:0;visibility:hidden;
+  transition:opacity 0.6s ease,visibility 0.6s;
+  cursor:none;
+  overflow:hidden;
+}
+#ssOv.open{opacity:1;visibility:visible}
+
+/* Two alternating image layers for crossfade */
+.ss-layer{
+  position:absolute;inset:0;
+  opacity:0;transition:opacity 1.4s ease;
+  overflow:hidden;
+}
+.ss-layer.active{opacity:1}
+/* Blurred backdrop — fills letterbox areas, same image darkened+blurred */
+.ss-bg-img{
+  position:absolute;inset:-8%;
+  width:116%;height:116%;
+  object-fit:cover;display:block;
+  filter:blur(28px) brightness(0.32) saturate(1.2);
+  transform-origin:center center;
+}
+/* Main image — always fully visible, no cropping */
+.ss-img{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:contain;display:block;
+  transform-origin:center center;
+}
+
+/* Ken Burns keyframe variants — scale only, safe for object-fit:contain */
+@keyframes kb1{from{transform:scale(1.0)}to{transform:scale(1.10)}}
+@keyframes kb2{from{transform:scale(1.10)}to{transform:scale(1.0)}}
+@keyframes kb3{from{transform:scale(1.0)}to{transform:scale(1.08)}}
+@keyframes kb4{from{transform:scale(1.08)}to{transform:scale(1.0)}}
+@keyframes kb5{from{transform:scale(1.0)}to{transform:scale(1.06)}}
+/* Background blur layer gets the panning — it's covered+oversized so edges never show */
+@keyframes kbBg1{from{transform:scale(1.0) translate(0%,0%)}to{transform:scale(1.15) translate(-3%,-2%)}}
+@keyframes kbBg2{from{transform:scale(1.15) translate(-3%,-2%)}to{transform:scale(1.0) translate(3%,2%)}}
+@keyframes kbBg3{from{transform:scale(1.0) translate(3%,1%)}to{transform:scale(1.18) translate(-2%,2%)}}
+@keyframes kbBg4{from{transform:scale(1.18) translate(2%,-2%)}to{transform:scale(1.0) translate(-3%,1%)}}
+@keyframes kbBg5{from{transform:scale(1.0) translate(-2%,2%)}to{transform:scale(1.14) translate(2%,-2%)}}
+
+/* dark vignette */
+#ssOv::after{
+  content:'';position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(0,0,0,0.55) 100%),
+    linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 25%, transparent 55%, rgba(0,0,0,0.75) 100%);
+}
+
+/* Top bar: clock + close hint */
+.ss-topbar{
+  position:absolute;top:0;left:0;right:0;z-index:4;
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:1.5rem 2rem 0;
+  pointer-events:none;
+}
+.ss-clock{
+  font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:300;
+  color:rgba(255,255,255,0.92);letter-spacing:0.04em;
+  text-shadow:0 2px 20px rgba(0,0,0,0.7);
+  line-height:1;
+}
+.ss-date{
+  font-family:'Jost',sans-serif;font-size:0.75rem;font-weight:300;
+  color:rgba(255,255,255,0.55);letter-spacing:0.14em;text-transform:uppercase;
+  margin-top:0.3rem;
+}
+.ss-exit-hint{
+  font-family:'Jost',sans-serif;font-size:0.72rem;font-weight:300;
+  color:rgba(255,255,255,0.35);letter-spacing:0.12em;text-transform:uppercase;
+  padding-top:0.4rem;pointer-events:all;cursor:pointer;
+}
+.ss-exit-hint:hover{color:rgba(255,255,255,0.7);}
+
+/* Bottom info panel */
+.ss-info{
+  position:absolute;bottom:0;left:0;right:0;z-index:4;
+  padding:0 2.5rem calc(env(safe-area-inset-bottom,0px) + 2.5rem);
+  pointer-events:none;
+  transition:opacity 0.35s ease;
+}
+.ss-brand{
+  font-family:'Cormorant Garamond',serif;font-size:0.8rem;font-weight:300;
+  color:var(--gold);letter-spacing:0.22em;text-transform:uppercase;margin-bottom:0.6rem;
+  opacity:0.85;
+}
+.ss-name{
+  font-family:'Playfair Display',serif;font-size:clamp(1.6rem,4vw,2.8rem);
+  font-weight:600;color:#fff;line-height:1.15;
+  text-shadow:0 3px 24px rgba(0,0,0,0.8);
+  margin-bottom:0.4rem;
+  max-width:70%;
+  animation:ssInfoIn 0.8s ease forwards;
+}
+.ss-meta{
+  font-family:'Jost',sans-serif;font-size:0.82rem;font-weight:300;
+  color:rgba(255,255,255,0.6);letter-spacing:0.08em;
+  animation:ssInfoIn 0.8s 0.1s ease both;
+}
+.ss-divider{
+  width:3rem;height:1px;background:var(--gold);opacity:0.6;
+  margin:0.75rem 0;
+  animation:ssInfoIn 0.8s 0.05s ease both;
+}
+.ss-view-btn{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  margin-top:1rem;
+  padding:0.6rem 1.4rem;border-radius:50px;
+  background:rgba(201,168,100,0.18);border:1px solid rgba(201,168,100,0.55);
+  color:var(--gold);font-family:'Jost',sans-serif;font-size:0.78rem;font-weight:400;
+  letter-spacing:0.1em;cursor:pointer;
+  backdrop-filter:blur(8px);
+  transition:background 0.2s,box-shadow 0.2s,transform 0.15s;
+  animation:ssInfoIn 0.8s 0.2s ease both;
+  pointer-events:all;
+}
+.ss-view-btn:hover{background:rgba(201,168,100,0.35);box-shadow:0 0 0 3px rgba(201,168,100,0.2);}
+.ss-view-btn:active{transform:scale(0.95)}
+@keyframes ssInfoIn{
+  from{opacity:0;transform:translateY(14px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* Progress dots */
+.ss-dots{
+  position:absolute;top:50%;right:1.5rem;transform:translateY(-50%);
+  z-index:4;display:flex;flex-direction:column;gap:5px;pointer-events:none;
+}
+.ss-dot{
+  width:4px;height:4px;border-radius:50%;
+  background:rgba(255,255,255,0.25);transition:all 0.4s ease;
+}
+.ss-dot.active{background:var(--gold);height:16px;border-radius:2px;}
+
+/* Progress bar at very bottom */
+.ss-progress{
+  position:absolute;bottom:0;left:0;z-index:5;
+  height:2px;background:var(--gold);opacity:0.7;
+  width:0%;transition:none;
+}
+
 /* open reel button in filter bar */
 @keyframes reelPulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,100,0.45)}60%{box-shadow:0 0 0 6px rgba(201,168,100,0)}}
 .reel-open-btn{
@@ -1333,6 +1490,7 @@ textarea.inp{resize:vertical;min-height:72px;width:100%}
     <button class="reel-open-btn" onclick="openReel(0)" title="Swipe through designs">
       <span class="roi">▶</span> Reel View
     </button>
+    <button class="display-mode-btn" onclick="openSlideshow()" title="Display mode for customers">✦ Display</button>
     </div>
 
   <!-- Grid -->
@@ -2888,6 +3046,178 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowUp'   || e.key === 'ArrowLeft')  { e.preventDefault(); reelGo(-1); }
   if (e.key === 'Escape') closeReel();
 });
+
+// ── DISPLAY / SLIDESHOW MODE ──────────────────────
+(function(){
+  const KB=['kb1','kb2','kb3','kb4','kb5'];
+  let _prods=[],_idx=0,_timer=null,_clockTimer=null,_wakeLock=null;
+  let _active=false,_progTimer=null,_progStart=0;
+  const DURATION=6000; // ms per slide
+
+  function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+
+  function buildOverlay(){
+    if(document.getElementById('ssOv'))return;
+    document.body.insertAdjacentHTML('beforeend',
+      '<div id="ssOv" onclick="SS.close()">'
+      +'<div class="ss-layer" id="ssLayerA"><img class="ss-bg-img" id="ssBgA" src="" alt=""><img class="ss-img" id="ssImgA" src="" alt=""></div>'
+      +'<div class="ss-layer" id="ssLayerB"><img class="ss-bg-img" id="ssBgB" src="" alt=""><img class="ss-img" id="ssImgB" src="" alt=""></div>'
+      +'<div class="ss-topbar">'
+      +  '<div><div class="ss-clock" id="ssClock"></div><div class="ss-date" id="ssDate"></div></div>'
+      +  '<div class="ss-exit-hint" onclick="event.stopPropagation();SS.close()">Tap to exit</div>'
+      +'</div>'
+      +'<div class="ss-info" id="ssInfo">'
+      +  '<div class="ss-brand">Sri Lalitha Jewellery</div>'
+      +  '<div class="ss-name" id="ssName"></div>'
+      +  '<div class="ss-divider"></div>'
+      +  '<div class="ss-meta" id="ssMeta"></div>'
+      +  '<button class="ss-view-btn" id="ssViewBtn" onclick="event.stopPropagation();SS.viewCurrent()">👁 View Item</button>'
+      +'</div>'
+      +'<div class="ss-dots" id="ssDots"></div>'
+      +'<div class="ss-progress" id="ssProgress"></div>'
+      +'</div>'
+    );
+  }
+
+  function tickClock(){
+    const now=new Date();
+    const h=now.getHours(),m=now.getMinutes();
+    const ampm=h>=12?'PM':'AM',hh=h%12||12,mm=String(m).padStart(2,'0');
+    const el=document.getElementById('ssClock');if(el)el.textContent=hh+':'+mm+' '+ampm;
+    const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const de=document.getElementById('ssDate');
+    if(de)de.textContent=days[now.getDay()]+', '+months[now.getMonth()]+' '+now.getDate()+', '+now.getFullYear();
+  }
+
+  function buildDots(){
+    const dots=document.getElementById('ssDots');if(!dots)return;
+    const max=Math.min(_prods.length,9);
+    dots.innerHTML=Array.from({length:max},(_,i)=>'<div class="ss-dot'+(i===_idx%max?' active':'')+'"></div>').join('');
+  }
+  function updateDots(){
+    const dots=document.getElementById('ssDots');if(!dots)return;
+    const max=Math.min(_prods.length,9);
+    dots.querySelectorAll('.ss-dot').forEach((d,i)=>d.classList.toggle('active',i===_idx%max));
+  }
+
+  function startProgress(){
+    const bar=document.getElementById('ssProgress');if(!bar)return;
+    bar.style.transition='none';bar.style.width='0%';
+    clearTimeout(_progTimer);
+    _progStart=Date.now();
+    requestAnimationFrame(()=>{
+      bar.style.transition='width '+DURATION+'ms linear';
+      bar.style.width='100%';
+    });
+  }
+
+  function showSlide(idx,layerEl,imgEl){
+    const p=_prods[idx];
+    // set both main image and blurred backdrop to same src
+    const bgImg=layerEl.querySelector('.ss-bg-img');
+    if(bgImg)bgImg.src=p.img2d;
+    imgEl.src=p.img2d;
+    // Ken Burns on main image (scale only — safe for object-fit:contain)
+    const kbIdx=Math.floor(Math.random()*KB.length);
+    const kb=KB[kbIdx],kbBg='kbBg'+(kbIdx+1);
+    imgEl.style.animation='none';
+    if(bgImg){bgImg.style.animation='none';void bgImg.offsetWidth;bgImg.style.animation=kbBg+' '+(DURATION+1600)+'ms ease-in-out forwards';}
+    void imgEl.offsetWidth;
+    imgEl.style.animation=kb+' '+(DURATION+1600)+'ms ease-in-out forwards';
+    layerEl.classList.add('active');
+    // Fade out info panel first, then update text at crossfade midpoint (700ms)
+    // so image and text always match — avoids old image / new text mismatch
+    const infoEl=document.getElementById('ssInfo');
+    if(infoEl)infoEl.style.opacity='0';
+    setTimeout(()=>{
+      const nameEl=document.getElementById('ssName'),metaEl=document.getElementById('ssMeta');
+      if(nameEl){
+        nameEl.style.animation='none';void nameEl.offsetWidth;
+        nameEl.style.animation='ssInfoIn 0.8s ease forwards';
+        nameEl.textContent=p.name||p.code||(getSubIcon&&getSubIcon(p.cat,p.sub))||'';
+      }
+      if(metaEl){
+        metaEl.style.animation='none';void metaEl.offsetWidth;
+        metaEl.style.animation='ssInfoIn 0.8s 0.1s ease both';
+        const CAT=typeof CAT_LABEL!=='undefined'?CAT_LABEL:{gold:'Gold',silver:'Silver',panchaloham:'Panchaloham'};
+        metaEl.textContent=(CAT[p.cat]||'')+(p.sub?' · '+p.sub:'')+(p.wt?' · '+p.wt:'');
+      }
+      const btnEl=document.getElementById('ssViewBtn');
+      if(btnEl){btnEl.style.animation='none';void btnEl.offsetWidth;btnEl.style.animation='ssInfoIn 0.8s 0.25s ease both';}
+      if(infoEl)infoEl.style.opacity='1';
+      updateDots();
+    },700);
+    startProgress();
+  }
+
+  let _curLayer=0;
+  function next(){
+    _idx=(_idx+1)%_prods.length;
+    const aLayer=document.getElementById('ssLayerA'),bLayer=document.getElementById('ssLayerB');
+    const aImg=document.getElementById('ssImgA'),bImg=document.getElementById('ssImgB');
+    if(_curLayer===0){
+      // B is incoming
+      bLayer.classList.remove('active');
+      bImg.style.animation='none';
+      const bBg=bLayer.querySelector('.ss-bg-img');if(bBg)bBg.style.animation='none';
+      showSlide(_idx,bLayer,bImg);
+      setTimeout(()=>aLayer.classList.remove('active'),1400);
+      _curLayer=1;
+    } else {
+      aLayer.classList.remove('active');
+      aImg.style.animation='none';
+      const aBg=aLayer.querySelector('.ss-bg-img');if(aBg)aBg.style.animation='none';
+      showSlide(_idx,aLayer,aImg);
+      setTimeout(()=>bLayer.classList.remove('active'),1400);
+      _curLayer=0;
+    }
+    schedule();
+  }
+
+  function schedule(){
+    clearTimeout(_timer);
+    _timer=setTimeout(next,DURATION);
+  }
+
+  async function open(){
+    buildOverlay();
+    // Collect all products that have an image
+    _prods=shuffle((typeof D!=='undefined'?D.products:[]).filter(p=>p.img2d));
+    if(!_prods.length){toast('No images to display','err');return;}
+    _active=true;_idx=0;_curLayer=0;
+    document.getElementById('ssOv').classList.add('open');
+    document.body.style.overflow='hidden';
+    buildDots();
+    tickClock();
+    _clockTimer=setInterval(tickClock,10000);
+    // Show first slide on layer A immediately
+    const aLayer=document.getElementById('ssLayerA'),aImg=document.getElementById('ssImgA');
+    showSlide(0,aLayer,aImg);
+    schedule();
+    // Wake Lock — keep screen on
+    if(navigator.wakeLock){try{_wakeLock=await navigator.wakeLock.request('screen');}catch(e){}}
+  }
+
+  function close(){
+    if(!_active)return;
+    _active=false;
+    clearTimeout(_timer);clearInterval(_clockTimer);
+    document.getElementById('ssOv').classList.remove('open');
+    document.body.style.overflow='';
+    if(_wakeLock){try{_wakeLock.release();}catch(e){}}_wakeLock=null;
+  }
+
+  function viewCurrent(){
+    const p=_prods[_idx];if(!p)return;
+    close();
+    // small delay so the overlay fade-out starts before modal opens
+    setTimeout(()=>openProd(p.id),120);
+  }
+
+  window.SS={open,close,viewCurrent};
+  window.openSlideshow=open;
+})();
 
 // ── START ─────────────────────────────────────────
 history.replaceState({view:'home'},'');
